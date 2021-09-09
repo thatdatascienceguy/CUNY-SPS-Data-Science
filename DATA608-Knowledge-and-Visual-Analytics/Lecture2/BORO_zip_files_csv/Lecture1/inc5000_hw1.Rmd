@@ -1,0 +1,69 @@
+---
+title: "DATA608 lecture 1 HW"
+author: "Jonathan Heranndez"
+date: "August 31, 2017"
+output: html_document
+---
+
+```{r loadmodules, echo = FALSE, include = FALSE}
+# load packages if not installed
+if (!require(dplyr)) install.packages("dplyr")
+if (!require(ggplot2)) install.packages("ggplot2") 
+```
+```{r getData, echo=TRUE, cache =TRUE}
+github_url <- "https://raw.githubusercontent.com/charleyferrari/CUNY_DATA608/master/lecture1/Data/inc5000_data.csv"
+inc5000 <- read.csv(url(github_url))
+```
+
+```{r graphDistribution, echo = TRUE}
+ggplot(inc5000, aes(State)) +
+  geom_bar(width = .8) +
+  ggtitle(label = "Number of Companies by State") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, hjust = 0, vjust = .5),
+        axis.title = element_blank()) +
+  ggsave(file = "Figure1.png")
+```
+
+```{r avgEmployment, echo = TRUE}
+# use dplyr to acquire the state with the 3rd most companies
+nCompaniesSorted <- inc5000 %>% count(State) %>% arrange(desc(n))
+State_3rd <- nCompaniesSorted[3, ]$State # state with the 3rd most companies
+employees_vs_companies <- inc5000 %>% 
+  filter(State == State_3rd) %>% select("Employees", "Industry")
+
+ggplot(employees_vs_companies, aes(x = Industry, y = Employees)) +
+  geom_bar(stat = "summary", fun.y = "mean", width = .5, na.rm = TRUE) +
+  ggtitle("Average Number of Employees per Industry in NY") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(), panel.background = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(size = 5.5, angle = 45, hjust = 1, vjust = 1.25),
+        axis.title = element_blank()) +
+  ggsave(file = "Figure2.png")
+```
+
+```{r mostRevenuePerEmployee, echo = TRUE}
+revenue_per_employee <- inc5000 %>% 
+  select("Revenue", "Employees", "Industry") %>% 
+  group_by(Industry) %>%
+  summarise_each(funs(sum(., na.rm = TRUE))) %>% # sum up both columns
+  rowwise() %>%
+  mutate(Rev_emp = Revenue/Employees) # compute Total revenue vs total employees
+
+# plot revenue/employees for each type of industry
+ggplot(revenue_per_employee, aes(x = Industry, y = Rev_emp)) +
+  geom_bar(stat = "identity", width = .5) +
+  theme_bw() +
+  ggtitle("Revenue per Employee") + # remove/blank out as much to keep data-to-ink
+  # ratio high
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(), panel.background = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(size = 7, angle = 45, hjust = 1, vjust = 1.25),
+        axis.title = element_blank()) +
+  ggsave(file = "Figure3.png")
+```
+

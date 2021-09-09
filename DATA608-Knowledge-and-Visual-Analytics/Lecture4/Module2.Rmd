@@ -1,0 +1,71 @@
+---
+title: "Lecture 2 - Tax lot data NYC"
+author: "Jonathan Heranndez"
+date: "September 13, 2017"
+output: html_document
+---
+
+```{r test, echo= FALSE, include = FALSE}
+library(dplyr)
+library(ggplot2)
+source("all_PLUTO_data.R")
+```
+
+```{r combineboroughs, echo = TRUE, cache = TRUE}
+# combine all 5 boroughs dataset into one..
+nycPluto <- rbind(BK,BX,QN,SI,MN, colNames = FALSE, fill = TRUE)
+nycPluto <- nycPluto[, -c("x")] # get rid of extra column formed by above; not needed
+```
+
+```{r question1, echo = TRUE}
+# get buildings that were built after 1850 and later
+nycPluto1850 <- nycPluto %>% filter(YearBuilt > 1850) %>% 
+  select(YearBuilt, NumBldgs)
+
+# ggplot but use the log scale for y to better see the number of buildings per year
+ggplot(data = nycPluto1850, aes(x = YearBuilt, y = NumBldgs)) +
+  geom_bar(stat = "summary", fun.y = "log10", na.rm = TRUE) +
+  ggtitle("NYC Buildings built since 1850") +
+  ylab("log(Number of Buildings Built)") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(), panel.background = element_blank(),
+        axis.title.x = element_blank())
+```
+
+#### Looking at the data many buildings were built around the 1920's to 1940's
+
+#### roughly. Seeing very few buildings based on the data makes sense as that was 
+
+#### during the industrial revolution and apartment buildings started being built slowly.
+
+#### seeing few buildings especially after around 1960/1970 also makes sense as many
+
+#### nyc buildings are mostly pre-war buildings and few buildings and space for post-war buildings.
+
+```{r question2, echo = TRUE}
+# tall buildings at least 20 floors or more
+tallNYCBuildings <- nycPluto %>% filter(NumFloors >= 20 & YearBuilt > 1850) %>%
+  select(NumFloors, NumBldgs, YearBuilt)
+
+# see the unique number of floors
+x <- tallNYCBuildings$NumFloors
+
+# split number of Floors into ranges for graphing (buildings with 20-30, 30-40,...)
+floor_ranges <- cut(x, seq(from = 19.9, to = 120, by = 10),
+                    labels = c("20-story", "30-story", "40-story", "50-story", 
+                               "60-story", "70-story", "80-story", "90-story",
+                               "100-story", "110-story"))
+
+# now plot number of buildings each year but add a facet to have multiple graphs/grids by floor range
+ggplot(data = tallNYCBuildings, aes(x = YearBuilt, y = NumBldgs)) +
+  geom_bar(stat = "summary", fun.y = "log10", na.rm = TRUE) +
+  facet_grid(as.factor(floor_ranges) ~.) +
+  ggtitle("NYC Buildings built since 1850") +
+  ylab("log(Number of Buildings Built)") +
+  theme_bw() +
+  theme(panel.border = element_blank(), panel.background = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 7, angle = 45, hjust = 1, vjust = 1.25)) +
+  ggsave(file = "Hw2_figure2.png")
+```

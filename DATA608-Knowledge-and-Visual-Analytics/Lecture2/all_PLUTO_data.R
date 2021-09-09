@@ -1,0 +1,6 @@
+library(data.table)
+BX <- fread("BX.csv",sep = ',', header = TRUE)
+BK <- fread("BK.csv",sep = ',', header = TRUE)
+MN <- fread("MN.csv",sep = ',', header = TRUE)
+QN <- fread("QN.csv",sep = ',', header = TRUE)
+SI <- fread("SI.csv",sep = ',', header = TRUE)
