@@ -1,0 +1,125 @@
+---
+title: "Applied Predictive Modeling"
+subtitle: "DATA 624 Group 2 Homework"
+author: "John Grando, Kyle Gilde, Jonathan Hernandez, Albert Gilharry, Neil Hwang"
+date: "January 27, 2019"
+output:
+  html_document:
+    code_folding: show
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=10, 
+                      fig.height=5,
+                      fig.align = 'center', 
+                      echo = TRUE,
+                      cache = TRUE)
+```
+
+```{r echo=FALSE}
+#library modules
+suppressWarnings(suppressMessages(library(grid)))
+suppressWarnings(suppressMessages(library(gridExtra)))
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(tidyr)))
+suppressWarnings(suppressMessages(library(caret)))
+suppressWarnings(suppressMessages(library(C50)))
+suppressWarnings(suppressMessages(library(rpart)))
+suppressWarnings(suppressMessages(library(rpart.plot)))
+
+```
+
+# Overview
+
+**For each response, and commentary, provided by us, the text will be bolded, as it appears here**
+
+# Chapter 8 Regression Trees and Rule-Based Models
+
+## Question 8.2
+
+Use a simluation to show tree bias with different granuarities.  
+**This question appears to be highlighting one of the big pitfalls of tree based models, which is *selection bias* that is well summarized by a quote in page 182 of the reading: **
+
+***The danger occurs when a data set consists of a mix of informative and noise vairables, and the noise variables have many more splits than the informative variable.  Then there is high probability that the noise variables will be chosen to split the top nodes of the tree.  Pruning will produce either a  tree with misleading structure or no tree at all.***
+
+**The author also notes that as the presence of missing values increases, the selection of predictors becomse more biased.**
+
+**In order to demonstrate this issue, we will use the classic mtcars dataset.  Note, we have removed many of the high-granularity attributes in order to construct a sufficient example for this exercise.**
+```{r}
+set.seed(2)
+data("mtcars")
+#mtcars$mpg <- cut(mtcars$mpg, breaks = seq(10, 35, 5), labels = c(as.character(seq(10, 25, 5)), '30+'))
+mtcars <- mtcars %>% select(cyl, vs, am, gear, carb)
+summary(mtcars)
+```
+
+**Make train/test splitting for model analysis**
+```{r}
+mtcars_train_validate_list <- createDataPartition(y= mtcars$cyl, p=0.7, list = FALSE)
+mtcars_train_test <- mtcars[mtcars_train_validate_list,]
+mtcars_validate <- mtcars[-mtcars_train_validate_list,]
+```
+
+
+**For the constructed models, we will be predicting the number of cylinders a car has.  However, we will first pre process inputs in order to get a set scale of data.  This will be useful when we add in some noisy data later on, such that the same relative ranges are used.**
+```{r}
+mtcars_transformation <- preProcess(
+  mtcars_train_test, 
+  method = list(center = colnames(mtcars %>% select(-cyl)), 
+       scale = colnames(mtcars %>% select(-cyl))))
+mtcars_transformed <- predict(mtcars_transformation, mtcars_train_test)
+summary(mtcars_transformed)
+```
+
+**Model and compute accuracy with no noise inserted**
+```{r}
+tree_model <- C5.0(formula = as.factor(mtcars_train_test$cyl) ~ .,
+                        data = mtcars_train_test %>% select(-cyl))
+tree_model
+plot(tree_model, roundint = FALSE)
+confusion_matrix <- table(predict(tree_model, mtcars_validate), mtcars_validate$cyl)
+print(confusion_matrix)
+(accuracy <- sum(diag(confusion_matrix))/sum(confusion_matrix))
+```
+
+**Now that we have calculated what the model should look like without noise, let's add some additional columns, which should not be picked if there were no selection bias.**
+
+**Add noisy columns of varying granularity and re-process data frame**
+```{r}
+#create
+many_unique_values <- mtcars$am + floor(runif(nrow(mtcars), min = -1000, max = 1000)) / 1000
+mid_unique_values <- mtcars$am + floor(runif(nrow(mtcars), min = -10, max = 10)) / 10
+few_unique_values <- mtcars$am + floor(runif(nrow(mtcars), min = -2, max = 2)) / 2
+
+#apply to base dataset
+mtcars_noisy <- cbind(mtcars, 
+                    many_noise = many_unique_values, 
+                    mid_noise = mid_unique_values, 
+                    few_noise = few_unique_values)
+#split
+mtcars_noisy_train_test <- mtcars_noisy[mtcars_train_validate_list,]
+mtcars_noisy_validate <- mtcars_noisy[-mtcars_train_validate_list,]
+#center and scale
+mtcars_noisy_transformation <- preProcess(
+  mtcars_noisy_train_test, 
+  method = list(center = colnames(mtcars %>% select(-cyl)), 
+       scale = colnames(mtcars %>% select(-cyl))))
+mtcars_noisy_transformed <- predict(mtcars_noisy_transformation, mtcars_noisy_train_test)
+summary(mtcars_noisy_transformed)
+```
+
+**Re-run tests and see what the effect is on the model trees**
+```{r}
+tree_noisy_model <- C5.0(formula = as.factor(mtcars_noisy_train_test$cyl) ~ .,
+                        data = mtcars_noisy_train_test %>% select(-cyl))
+tree_noisy_model
+plot(tree_noisy_model, roundint = FALSE)
+confusion_matrix <- table(predict(tree_noisy_model, mtcars_noisy_validate), mtcars_noisy_validate$cyl)
+print(confusion_matrix)
+(accuracy <- sum(diag(confusion_matrix))/sum(confusion_matrix))
+```
+
+**The results above show that selection bias has caused the tree to pick the `many_noise` attribute in the second level of nodes.  This is not quite the example laid out in the quote above, but does still show the issue at hand.  In fact, the validation accuracy has dropped from 55% to 33% showing why this type of issue is such a problem**
+
