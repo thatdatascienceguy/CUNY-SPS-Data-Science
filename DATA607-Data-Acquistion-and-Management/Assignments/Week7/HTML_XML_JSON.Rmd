@@ -1,0 +1,69 @@
+---
+title: "Working with HTML, XML and, JSON Files"
+author: "Jonathan Hernandez"
+date: "October 14, 2016"
+output: html_document
+---
+
+#### This Assignment reads 3 files from the web (Github) which are HTML, XML and
+
+#### JSON. The data is 3 books with attributes such as title, author, ISBN,
+
+#### number of pages etc. Lets see how R reads in these three files
+
+```{r loadLibaries}
+library(jsonlite)
+library(XML)
+library(xml2)
+library(RCurl)
+library(rvest)
+library(dplyr)
+library(plyr)
+```
+
+#### Load JSON data
+
+```{r BooksJSON, echo = TRUE}
+jsonURL <- "https://raw.githubusercontent.com/jonathan1987/CUNYSPS_IS607/master/Week7/books.json"
+books_json <- fromJSON(jsonURL)
+```
+
+```{r BooksHTML, echo = TRUE}
+htmlURL <- "https://raw.githubusercontent.com/jonathan1987/CUNYSPS_IS607/master/Week7/books.html"
+books_HTML <- read_html(htmlURL)
+books_HTML <- html_table(books_HTML)
+```
+
+```{r BooksXML, echo = TRUE}
+xmlURL <- "https://raw.githubusercontent.com/jonathan1987/CUNYSPS_IS607/master/Week7/Books.xml"
+books_XML <- xmlRoot(xmlParse(getURL(xmlURL))) # get XML file contents
+
+# make into a dataset with ldply
+books_XML_df <- ldply(xmlToList(books_XML), data.frame)
+
+# remove the .id column
+books_XML_df <- books_XML_df %>% select(-.id)
+```
+
+#### Print out each dataset
+
+```{r printDatasets, echo = TRUE}
+
+books_json
+
+books_HTML
+
+books_XML_df
+```
+
+#### We can see that the datasets are similar except for when it comes to
+
+#### multiple objects (authors in this case)
+
+#### JSON takes all authors and puts it in one column
+
+#### HTML has authors for a book across multiple columns
+
+#### XML like HTML takes multiples authors for a books and puts them in 
+
+#### multiple columns.

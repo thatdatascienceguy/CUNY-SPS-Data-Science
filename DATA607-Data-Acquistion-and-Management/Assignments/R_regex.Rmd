@@ -1,0 +1,80 @@
+---
+title: "Character Manipulation and Data Processing"
+author: "Jonathan Hernandez"
+date: "September 10, 2016"
+output: html_document
+---
+
+```{r question3, echo=TRUE}
+name <- c("Moe Szyslak", "Burns, C. Montgomery", "Rev. Timothy Lovejoy",
+          "Ned Flanders", "Simpson, Homer", "Dr. Julius Hibbert")
+
+# 3. Rearrange the vector so that all elements conform to the standard
+# first_name last_name
+
+# split the vector based on spaces
+name_split <- strsplit(name, " ")
+name_split
+
+check_name_prefix <- function(nameString)
+{
+   regexpr("\\.", nameString[1])
+}
+
+sapply(name, check_name_prefix)
+
+```
+
+### 1. The regexular expression "[0-9]+\\$" matches any string that ends with
+
+### one or more digits followed by a \ character
+
+### 2. The regular expression "\\b[a-z]{1,4}\\b" matches any string that starts
+
+### with a \b followed by 1-4 characters of the alphabet followed by a \b
+
+### 3. The regular expression ".*?\\.txt$" matches any string that ends with a 
+
+### \.txt at the end
+
+### 4. The regular expression "\\d{2}/\\d{2}/\\d{4}" matches only the following
+
+### string \dd\dd\dddd
+
+### 5. The regular expression ""<(.+?)>.+?</\\1>" matches a string starting with
+
+### one or more characters enclosed in angular brackets then followed by one or
+
+### more characters followed by <\1> at the end.
+
+```{r question4, echo = TRUE}
+prob4.1 <- "[0-9]+\\$"
+
+example_prob4.1 <- regexpr(prob4.1, "mypassword2016\\")
+example_prob4.1
+
+prob4.2 <- "\\b[a-z]{1,4}\\b"
+# Examples:
+# "\bobby\b"
+# "\bush\b"
+# "\boy\b"
+
+example_prob4.2 <- regexpr(prob4.2, "\bobby\b")
+example_prob4.2
+
+prob4.3 <- ".*?\\.txt$"
+# Examples:
+# "CUNYSPS\.txt"
+# "nc9aqt\.txt"
+
+example_prob4.3 <- regexpr(prob4.3, "mnvac4534\\.txt")
+example_prob4.3
+
+prob4.4 <- "\\d{2}/\\d{2}\\d{4}"
+example_prob4.4 <- regexpr(prob4.4, "\\dd\\dd\\dddd")
+example_prob4.4
+
+prob4.5 <- "<(.+?)>.+?</\\1>"
+example_prob4.5 <- regexpr(prob4.5, "<nfoaetyey49y5>j437n9m8byt<\1>")
+example_prob4.5
+```

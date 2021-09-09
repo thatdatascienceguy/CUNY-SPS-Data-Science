@@ -1,0 +1,44 @@
+---
+title: "SQLandR"
+author: "Jonathan Hernandez"
+date: "September 6, 2016"
+output: html_document
+---
+
+## This project is to demostrate how to use the RMySQL package to load and retrieve
+## data from a MySQL database and use it in R.
+
+```{r connect2DB, cache = TRUE, echo = TRUE}
+# Assumes you have the RMySQL libary on your R environment
+# you can uncomment the next line if you already have the package installed.
+library(RMySQL)
+surveysDB <- dbConnect(MySQL(), user='root', password='<your root password>', 
+                           dbname='surveys', host = '127.0.0.1')
+# password for security purposes left blank but you should put whatever username
+# and password comibnation that is on your DB server.
+# you can also use localhost for the host parameter.
+
+dbGetInfo(surveysDB) # get some information about your new DB connection
+```
+
+```{r retrieveData, echo=TRUE}
+# get table information
+dbListTables(surveysDB)
+
+# get attribute info for each table
+dbListFields(surveysDB, 'movie')
+dbListFields(surveysDB, 'person')
+dbListFields(surveysDB, 'movie_rating')
+
+# Finally retrieve each users and what they rated the movies they saw
+
+dbGetQuery(surveysDB, 
+'select pname as Person, moviename, rating from person p
+inner join movie_rating mr
+on p.pID = mr.PID
+inner join movie m
+on m.MID = mr.MID;')
+
+# Close the DB connection
+dbDisconnect(surveysDB)
+```

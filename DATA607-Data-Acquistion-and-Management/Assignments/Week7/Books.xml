@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FavoriteBooks>
+    <Book>
+        <title>Doing Data Science: Straight Talk from the Frontline</title>
+        <author>
+            <name>Cathy O'Neil</name>
+        </author>
+    
+        <author>
+            <name>Rachel Schutt</name>
+        </author>
+        <Publisher>O'Reilly Media; 1 edition</Publisher>
+        <ISBN-10>1449358659</ISBN-10>
+        <ISBN-13>978-1449358655</ISBN-13>
+        <pages>408</pages>
+    </Book>
+    
+    <Book>
+        <title>Learning SQL</title>
+        <author>
+            <name>Alan Beaulieu</name>
+        </author>
+        <Publisher>O'Reilly Media; 2nd edition</Publisher>
+        <ISBN-10>0596520832</ISBN-10>
+        <ISBN-13>978-0596520830</ISBN-13>
+        <pages>338</pages>
+    </Book>
+    
+    <Book>
+        <title>Learning from Data</title>
+        <author>
+            <name>Yaser S. Abu-Mostafa</name>
+        </author>
+    
+        <author>
+            <name>Malik Magdon-Ismail</name>
+        </author>
+    
+        <author>
+            <name>Hsuan-Tien Lin</name>
+        </author>
+        <Publisher>AMLBook</Publisher>
+        <ISBN-10>1600490069</ISBN-10>
+        <ISBN-13>978-1600490064</ISBN-13>
+        <pages>213</pages>
+    </Book>
+</FavoriteBooks>

@@ -1,0 +1,156 @@
+---
+title: "Examing Basball Players data Pre and Post PEDs"
+author: "Jonathan Hernandez"
+date: "November 19, 2016"
+output: html_document
+---
+
+## This Project will look at the Lahman database on MLB statistics and from the 
+
+## Wikipedia list of players who used Performance enhancing Drugs and compare the
+
+## stats for them before announcement and post announcement of use of PED's.
+
+## While many will think that the performance of Athelics will increase by taking
+
+## PED's, it will be interesting to see if that is the case or not.
+
+```{r loadLibraries, echo = FALSE, include = FALSE}
+if (!require(RMySQL)) install.packages("RMySQL")
+if (!require(rvest)) install.packages("rvest")
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(dplyr)) install.packages("dplyr")
+if (!require(stringr)) install.packages("stringr")
+```
+
+#### Get the data (wikipedia site)
+```{r getPEDUsers, echo = TRUE, cache = TRUE}
+bb_player_PED <- read.csv("Baseball_Players_PED.csv")
+head(bb_player_PED, 10)
+```
+
+#### Go into the Lahman Databse 
+
+#### (http://www.seanlahman.com/baseball-archive/statistics/)
+
+#### (you have three options, donwload it as a csv, MS Access or SQL) for the
+
+#### challenge I decided to go with SQL instead of being used to csv files
+
+#### There are archive data that contains previous MLB season but the one I will
+
+#### use is 2015 MLB (at the time of this project the latest is 2015 as that is
+
+#### the most recent one)
+
+```{r getLahaman_bb_Data, echo = TRUE, cache = TRUE}
+# connect to database
+con <- dbConnect(MySQL(), user = "cunysps", password = "cunyspsdb",
+                 dbname = "stats", host = "127.0.0.1")
+
+# Query to get baseball battings statistics during regular season since 1990
+bb_batting_query <- "select b.*, m.nameFirst, m.nameLast, m.nameGiven, m.bats, m.throws, m.debut, m.finalGame
+from batting b inner join stats.master m
+on b.playerID = m.playerID
+where b.yearID >= 1990;"
+
+baseball_batting_data <- dbGetQuery(con, bb_batting_query)
+summary(baseball_batting_data)
+
+# Query to get baseball pitching statistics during regular season since 1990
+bb_pitching_query <- "select p.*, m.nameFirst, m.nameLast, m.nameGiven, m.bats, m.throws, m.debut, m.finalGame
+from pitching p inner join stats.master m
+on p.playerID = m.playerID
+where p.yearID >= 1990;"
+
+baseball_pitching_data <- dbGetQuery(con, bb_pitching_query)
+summary(baseball_pitching_data)
+
+# get teamID and team names throughout since 1990
+bb_teams_query <- "select distinct t.yearID, t.name, t.teamID, t.lgID
+from stats.teams t where t.yearID >= 1990;"
+
+baseball_teams_data <- dbGetQuery(con, bb_teams_query)
+summary(baseball_teams_data)
+dbDisconnect(conn = con)
+```
+
+#### Begin Cleaning the dataset(s)
+
+```{r clean_PED_data, echo = TRUE}
+# remove some columns from the baseball_players_PED list
+# remove response and reference columns
+bb_player_PED_clean <- bb_player_PED %>% select(-Ref.) %>% select(-Response)
+
+# change the "Date.Announced" name to something more meaningful like "Date_Caught"
+colnames(bb_player_PED_clean)[3] <- "Date_Caught"
+
+# change the data type of Date_Caught to be of character format
+bb_player_PED_clean$Date_Caught <- as.character(bb_player_PED_clean$Date_Caught)
+# in the Penalty field, remove any '^' characters, [A] or [B] or [C] string
+bb_player_PED_clean$Penalty <- gsub("(\\[A\\]|\\^|\\[B\\]|\\[C\\])", ""
+                              ,bb_player_PED_clean$Penalty)
+
+# in the Player's Name field, remove any "([0-9])" characters 
+# and ("SS, GG, MVP") as it is not relvalent for this data analysis if a player
+# was a Golden Glove or voted most valuable player.
+bb_player_PED_clean$Player <- gsub("(SS|GG|MVP)", ""
+                                   ,bb_player_PED_clean$Player)
+
+bb_player_PED_clean$Player <- gsub("(\\([0-9]\\))", ""
+                                   ,bb_player_PED_clean$Player)
+
+# Trim white spaces
+bb_player_PED_clean$Player <- str_trim(bb_player_PED_clean$Player)
+
+# Remove accents in baseball player names (this will help us in cross-ref names
+# with the lahman database)
+bb_player_PED_clean$Player <- iconv(bb_player_PED_clean$Player,
+                                    to = 'ASCII//TRANSLIT')
+bb_player_PED_clean
+```
+
+#### Exploratory Data Analysis
+
+#### Here we will compare some player stats to get some insight
+
+```{r baseball_EDA, echo = TRUE}
+# graph baseball_ped user stats for a random set of people
+# get random rows
+PED_sample_rows <- sample(1:nrow(bb_player_PED_clean), 10 , replace = TRUE)
+
+# get data indexed by those random rows
+sample_baseball <- bb_player_PED_clean %>% slice(PED_sample_rows)
+
+for (i in 1:nrow(sample_baseball)) {
+  # get the year the baseball player was suspended and caught
+  year <- regmatches(sample_baseball$Date_Caught[i],
+                     regexpr("([0-9]){4}", sample_baseball$Date_Caught[i]))
+  # plot the data (if it is a pitcher, display stats such as ERA, SO and BB)
+    # split the Player name into first and last name to filter the data from
+    # the Lahman database
+    fname <- with(sample_baseball, head((str_split(Player[i], " "))[[1]], n = 1))
+    lname <- with(sample_baseball, tail((str_split(Player[i], " "))[[1]], n = 1))
+    if (sample_baseball$Position[i] == "P"){
+      tmp <- baseball_pitching_data %>% 
+        filter(grepl(fname, nameFirst),
+               nameLast == lname)
+      print(tmp)
+      print(ggplot(data = tmp, aes(yearID, ERA)) + 
+              geom_point(aes(color = "cyl")) + 
+              geom_line(aes(color = "blue")) + 
+              geom_vline(xintercept = as.integer(year)))
+    }
+    else {
+       tmp <- baseball_batting_data %>% 
+        filter(grepl(fname, nameFirst),
+               nameLast == lname) 
+       print(tmp)
+       
+       print(ggplot(data = tmp, aes(yearID, HR)) + 
+               geom_point(aes(color = "cyl")) + 
+               geom_line(aes(color = "blue")) + 
+               geom_vline(xintercept = as.integer(year)))
+    }
+}
+```

@@ -1,0 +1,7 @@
+base
+jsonlite
+curl
+bitops
+RCurl
+httr
+shiny

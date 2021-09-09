@@ -1,0 +1,75 @@
+---
+title: "Week 5 Assignment - Tidying and Transforming Data"
+author: "Jonathan Hernandez"
+date: "September 29, 2016"
+output: html_document
+---
+
+#### This assignment is to show how given a "wide" dataset structure using dplyr
+
+#### and tidyr, make the dataset clean and tidy in this case examing arrival
+
+#### delays for two airlines across five destinations and then perform analysis
+
+#### on the tidy dataset.
+
+#### Goal is to get the dataset to have the following format
+
+#### airline  destination   arrival
+
+```{r getflights, echo = TRUE}
+library(dplyr)
+library(tidyr)
+library(magrittr) # for using the pipe operators for dplyr/tidyr
+
+arrflights <- read.csv("/home/jonboy1987/Desktop/CUNYSPS/IS607/Assignments/Week5/flight_arrivals.csv")
+arrflights
+
+# Change some column names to be more readable
+colnames(arrflights)[1:2] <- c("airline","arrival")
+names(arrflights)
+```
+
+#### Lets make the data more tidy and better formated
+
+```{r tidyarrflights, echo = TRUE}
+# strip off the 3rd row as it really has no data associated with it
+arrflights <- arrflights[complete.cases(arrflights), ]
+
+# fill in the gaps for the airline so two for Alaska, two for AM Flights
+arrflights$airline <- c(rep("ALASKA", 2), rep("AM WEST", 2))
+
+# gather the number of flights by destination and then arrange the data to be
+# sorted by airline and then by destination
+tidy_arrflights <- arrflights %>% gather(destination, flights, 3:7) %>% 
+  arrange(airline, destination)
+
+# replace the '.' in the destination with ' '
+tidy_arrflights$destination <- gsub("\\.", " ", tidy_arrflights$destination)
+
+tidy_arrflights <- tidy_arrflights %>% mutate_each(funs(factor), -flights)
+tidy_arrflights
+```
+
+#### With our data clean, now we can perform some EDA (Exploratory Data Analysis)
+
+```{r EDA_tidy_arrflights, echo = TRUE}
+str(tidy_arrflights)
+
+# What kind of distribution does destination ~ log(flights) show???
+par(cex.axis = .75)
+with(tidy_arrflights, plot(destination, log(flights),
+                           main = "destination vs number of flights",
+                           xlab = "destination", ylab = "log(flights)"))
+
+# and the same for airlines vs flights?
+with(tidy_arrflights, plot(airline, log(flights),
+                           main = "airline vs number of flights",
+                           xlab = "airline", ylab = "log(flights)"))
+```
+
+#### It seems like the flights have roughly the same mean and median when 
+
+#### Compared with different airlines and destinations and possible normally
+
+#### distributed.

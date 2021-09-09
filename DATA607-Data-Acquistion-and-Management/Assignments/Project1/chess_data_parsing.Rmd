@@ -1,0 +1,146 @@
+---
+title: "Chess Tournament Data Parsing"
+author: "Jonathan Hernandez"
+date: "September 19, 2016"
+output: html_document
+---
+
+## This Assignment shows an example of given a raw file, using regular expressions
+
+## extract the necessary data, and once clean and tidy, export to a CSV file for
+
+## possible usage in a database. In this case it is working with chess Tournament
+
+## Data and the goal is to scrape and clean the tournament data to extract the
+
+## Player's name, their state, their pre-rating, total points accumated and the
+
+## average pre-chess rating of player's opponents.
+
+
+#### Load the data and make the columns more meaningful.
+
+#### Note: I use a Ubuntu Linux environment to store my work so do change the 
+
+#### directory of your choice on your OS.
+
+```{r loadChessTournamentDataset, echo = TRUE, cache = TRUE}
+# library(utils)
+chess_data <- read.fwf("/home/jonboy1987/Desktop/CUNYSPS/IS607/Assignments/Project1/tournamentinfo.txt"
+                       ,skip = 4, widths = c(5,3,32,6,6,6,6,6,6,6,6))
+
+# give the chess_data dataset more better attribute names
+colnames(chess_data) <- c("playerID_state","V2","PlayerName_prating","total_pts"
+                          ,"round1","round2","round3","round4","round5","round6"
+                          ,"round7")
+
+head(chess_data)
+```
+
+#### We can extract the State using a regular expression by using column 1 of the
+
+#### Chess data set by using "[A-Z]{2}" to get the states
+
+```{r getStates, echo = TRUE}
+# use grep and value = TRUE to show the strings that match the regexp
+states <- grep("[A-Z]{2}", chess_data$playerID_state, value = TRUE)
+
+# strip out the white spaces and store the Data
+states <- trimws(states)
+```
+
+#### We will also extract the ID of each player; this will come in handy in 
+
+#### computing the average pre-rating of opponents.
+
+```{r getPlayerID, echo = TRUE}
+ID <- grep("[0-9]+", chess_data$playerID_state, value = TRUE)
+ID <- trimws(ID)
+ID
+```
+
+#### The 2nd column in the chess_data set contains the name and Pre-Rating
+
+#### extract.
+
+```{r getPlayerName, echo = TRUE}
+# "^[A-Z]+" matches all strings that start with uppercase letters
+names <- grep("^[A-Z]+", chess_data$PlayerName_prating, value = TRUE)
+names <- trimws(names)
+```
+
+```{r getPreRating, echo = TRUE}
+# Extract the portion that starts with "R:"
+pre_rating <- regmatches(chess_data$PlayerName_prating,
+                         regexpr("R:\\s{1,2}[0-9]{1,4}",
+                                 chess_data$PlayerName_prating))
+
+pre_rating <- gsub("R:", "", pre_rating) # Remove the R:
+pre_rating <- trimws(pre_rating) # remove whitespaces
+```
+
+```{r getTotalPoints, echo = TRUE}
+# remove the "|" character from the total points field
+chess_data$total_pts <- gsub('\\|', '', chess_data$total_pts)
+
+total_points <- grep("^[0-9]+\\.[0-9]+",chess_data$total_pts, value = TRUE)
+total_points <- trimws(total_points)
+```
+
+#### For the hardest part; to compute the average pre chess rating of opponents
+
+#### First we will want to grab all the columns that contains all 7 rounds of 
+
+#### the tournament and extract the player ID's from them.
+
+```{r getRoundsDataSet, echo = TRUE}
+rounds <- chess_data[,c("round1", "round2", "round3", "round4", "round5",
+                        "round6", "round7")]
+
+# Begin stripping down the rounds dataset
+rounds <- rounds[-c(seq(from = 3, to = 192, by = 3)), ] # remove the -'s
+
+# Remove the rows below the player ID's
+rounds <- rounds[-c(seq(from = 2, to = 191, by = 2)), ]
+
+# Add NA's to the entries that are empty 
+# (player did not vs opponent for whatever reason)
+rounds <- apply(rounds, 2, function(x) gsub("\\s{4}", NA, x))
+
+# Now strip rest of characters so only the ID's and NA remain
+rounds <- apply(rounds,2, function(x) gsub("^\\|[A-Z]\\s+", "",x))
+rounds <- apply(rounds,2,as.numeric) # make the ID's numberic for indexing
+head(rounds,15)
+```
+
+#### With the rounds dataset now cleaned to just ID's and NA's we can map
+
+#### the ID to the pre-ratings
+
+```{r IDtoRating, echo = TRUE}
+# make a key-value pair so we can map 
+ID_rating <- list(ID, pre_rating)
+rounds <- apply(rounds, 1:2, function(x) ID_rating[[2]][x])
+rounds <- apply(rounds,2,as.numeric) # make numeric for computing the average
+rounds
+```
+
+#### Compute the Average Pre-Rating of opponents of each player
+
+```{r get_avg_prerating, echo = TRUE}
+avg_prerating <- round(apply(rounds, 1, mean, na.rm = TRUE), 0)
+avg_prerating
+```
+
+```{r combineData, echo = TRUE}
+chess_data_frame <- data.frame(name = names, state = states,
+                               TotalPoints = total_points, 
+                               Pre_Rating = pre_rating,
+                               Average_Pre_Rating = avg_prerating)
+chess_data_frame
+
+# Finally export the new Clean dataset into a .csv file
+write.csv(chess_data_frame,
+          "/home/jonboy1987/Desktop/CUNYSPS/IS607/Assignments/Project1/chess_tournament_data.csv",
+          row.names = FALSE)
+```

@@ -1,0 +1,60 @@
+---
+title: "DataScienceSkills.RMD"
+author: "Team"
+date: "October 14, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#read list of terms from db (asajjad)
+```{r}
+
+
+
+## Return DataFrame
+terms <- data.frame( category = c("Programming", "Math"),
+           skill = c("R", "Bayes"))
+```
+
+
+
+#Scrape Indeed (Liam)
+```{r}
+
+
+## Return List
+scraped_postings <- c("posting1 text", "posting2 text")
+
+```
+
+
+#Parse and Count Terms(Dmitry)
+```{r}
+
+
+##Return DataFrame
+terms_count <- data.frame(category = c("Programming", "Math"),
+                skill = c("R", "Bayes"),
+                count = c(1000,200)
+                )
+
+```
+
+
+
+#Persist to DB
+```{r}
+
+
+
+```
+
+
+#Visualize (Brandon)
+```{r}
+#This may just be a link to a public Tableau file
+```

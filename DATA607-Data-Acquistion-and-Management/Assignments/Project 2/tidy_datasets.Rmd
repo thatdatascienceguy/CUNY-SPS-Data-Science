@@ -1,0 +1,191 @@
+---
+title: "Cleaning Various Datasets"
+author: "Jonathan Hernandez"
+date: "October 4, 2016"
+output: html_document
+---
+
+#### This Project is for analyzing 3 different datasets from forums on the
+
+#### CUNY SPS IS607 Fall 2016, clean and tidy the data using dplyr and tidyr
+
+#### and then analyzing the data.
+
+```{r importLibaries, include = FALSE}
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(data.table)
+```
+
+#### First dataset to look at; a table showing income based on various religion
+
+#### traditions.
+
+```{r dataset1, echo = TRUE, cache = TRUE}
+# load the income_religion dataset
+income_religion <- read.csv("/home/jonboy1987/Desktop/CUNYSPS/IS607/Assignments/Project2/religion_income.csv")
+names(income_religion)
+
+# Change the attribute names of the dataset
+colnames(income_religion) <- c("Religion", "Low_Class", 
+                               "Middle_Class_1", "Middle_Class_2",
+                               "Upper_Middle_Class", "Sample_Size")
+
+income_religion
+```
+
+#### Data Dictionary
+
+* Low_class --> income < $30,000
+* Middle_Class_1 --> income between $30,000 and $49,999 inclusive
+* Middle_Class_2 --> income between $50,000 and $99,999 inclusive
+* Upper_Middle_Class --> income $100k or more
+
+#### Let's use the dplyr and tidyr packages and combine the incomes into 
+
+#### one column
+
+```{r cleanDataset1, echo = TRUE, warning = FALSE}
+# Tidy up the dataset by grouping the income levels into a single column 
+tidy_income_religion <- income_religion %>% gather(Working_Class,
+                                                   percentage_income, 2:5)
+
+# Check out the new dataset
+tidy_income_religion
+summary(tidy_income_religion)
+```
+
+```{r EDADataset1, echo = TRUE}
+# As people make more money, do percentage of Jehova witnesses decrease?
+JehovaW <- filter(tidy_income_religion, Religion == "Jehovah's Witness")
+JehovaW
+```
+
+#### Second dataset to examine (Social Networking Use)
+
+#### http://www.pewresearch.org/data-trend/media-and-technology/social-networking-use/
+
+```{r getDataset2, echo = TRUE, cache = TRUE}
+social_net_use <- read.csv('/home/jonboy1987/Desktop/CUNYSPS/IS607/Assignments/Project2/socialNetworkingUse.csv')
+social_net_use
+
+# Change the attribute names around
+colnames(social_net_use) <- c("Date", "All_Internet_Users", "Young_Adults",
+                              "Adults_Middleage1", "Adults_Middleage2",
+                              "Seniors")
+names(social_net_use)
+```
+
+```{r cleanDataset2, echo = TRUE}
+# combine the age groups into one variable namely Age for a more tidy dataset
+
+tidy_social_net_use <- social_net_use %>% gather(Age_Group, num_users, 2:6)
+tidy_social_net_use
+```
+
+#### Data Dictionary for the age groups in the tidy dataset:
+
+* Young_Adults --> people who were 18-29 years of age
+* Adults_Middleage1 --> people who were 30-49 years of age
+* Adults_Middleage2 --> people who were 50-64 years of age
+* Seniors --> people who were 65+ years of age
+
+#### Do some Analysis on the second dataset; A dataset that shows Social Network
+
+#### usage amongst different age groups as of July 2015
+
+```{r EDADataset2, echo = TRUE, warning = FALSE}
+# Show the boxplots of each type of age group
+
+# convert Age_group to factors and not characters
+tidy_social_net_use <- tidy_social_net_use %>% 
+  mutate_each(funs(factor), Age_Group) %>%
+  mutate_each(funs(as.numeric), num_users)
+
+# Plot the boxplot
+with(tidy_social_net_use,
+                 plot(Age_Group, num_users,
+                      main = "Boxplot of Internet Users for each age bracket",
+                      ylab = "Number of Internet Users", xaxt = "n"))
+labels <- tidy_social_net_use$Age_Group
+text(labels, labels = labels, 
+     par("usr")[3] - .25, srt = 45, xpd = TRUE, adj = 1, cex.axis = .75)
+```
+
+#### We can see that the distribution of number of internet users is just about
+
+#### right skewed for age brackets. The median for almost each age group can
+
+#### perhaps indicate that over the years, people began using the internet more.
+
+#### Now to examine the final dataset; a dataset that shows crimes in
+
+#### Chicago, IL since 2001
+
+### Note: this is a ~ 1.4 GB dataset so make sure you have enough RAM to load
+
+### into R.
+
+#### data can be found at https://data.cityofchicago.org/view/5cd6-ry5g
+
+```{r getDataset3, echo = TRUE, cache = TRUE, include = FALSE}
+chicago_crimes <- fread('/home/jonboy1987/Desktop/CUNYSPS/IS607/Assignments/Project2/Crimes_-_2001_to_present.csv')
+```
+
+#### Examine the dataset in more detail and get a sense of the data
+
+```{r, echo = TRUE}
+str(chicago_crimes)
+summary(chicago_crimes)
+```
+
+#### Examine the crimes that had an arrest and where the primary reason and/or
+
+#### description was either an "assault" or "theft" only
+
+#### But lets clean some portion of this dataset first
+
+```{r cleanDataset3, echo = TRUE}
+# update underscores of the attribute names with a '_' symbol so the attribute
+# names can be referenced with '$'
+colnames(chicago_crimes) <- gsub(" ", "_", colnames(chicago_crimes))
+
+# make the Primary_Type, Description, "Arrest" factor variables instead of 
+# character vectors (better to work with)
+tidy_chicago_crimes <- chicago_crimes %>%
+  mutate_each_(funs(factor), c("Primary_Type", "Description", "Arrest"))
+
+# select the data where Arrest == true and the primary type or description have
+# the words assault or theft in them
+
+tidy_chicago_crimes_arrest <- tidy_chicago_crimes %>% filter(Arrest == "true")
+
+# Any arrests dealing with assault?
+tidy_chicago_crimes_arrest_assault <-
+  tidy_chicago_crimes_arrest[grepl("assault",
+                                   tidy_chicago_crimes_arrest$Description,
+                                   ignore.case = TRUE) |
+                               grepl("assault",
+                                     tidy_chicago_crimes_arrest$Primary_Type,
+                                     ignore.case = TRUE), ]
+# Any arrests dealing with theft?
+tidy_chicago_crimes_arrest_theft <-
+  tidy_chicago_crimes_arrest[grepl("theft",
+                                   tidy_chicago_crimes_arrest$Description,
+                                   ignore.case = TRUE) |
+                               grepl("theft",
+                                     tidy_chicago_crimes_arrest$Primary_Type,
+                                     ignore.case = TRUE), ]
+
+dim(tidy_chicago_crimes_arrest_theft)
+dim(tidy_chicago_crimes_arrest_assault)
+```
+
+#### As we can see 
+
+#### Assuming the description and primary type of each crime only have those two
+
+#### strings that are about 207k thefts and about 93k assaults in Chicago reported
+
+#### since 2001.

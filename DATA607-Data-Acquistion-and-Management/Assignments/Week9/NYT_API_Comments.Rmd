@@ -1,0 +1,72 @@
+---
+title: "New York Times API"
+author: "Jonathan Hernandez"
+date: "October 24, 2016"
+output: html_document
+---
+
+## This assignment involves extracting data from the New York Times API
+
+## and converting the json data to a dataset.
+
+#### install any packages that might be necessary
+
+```{r loadpackages, echo = TRUE}
+if(!require(jsonlite)) install.packages("jsonlite")
+```
+
+#### Assumes the api-key is in a csv called 'NYT_API_KEY' in the same directory
+
+```{r getAPIKey, echo = TRUE}
+mykey <- read.csv("NYT_API_KEY.csv")
+api_key <- mykey$api_key
+```
+
+#### Get the URL's of the NYT Community API
+
+```{r getURLs, echo = TRUE}
+NYT_API_Base_URL <- "http://api.nytimes.com/svc/community/v3/user-content/"
+
+NYT_API_Recent_comments <- paste0(NYT_API_Base_URL, "recent.json?api-key=",
+                                  api_key)
+
+# get comments on a specific date say on 11-8-2008 (president Obama becoming
+# president)
+NYT_API_Comments_by_date <- paste0(NYT_API_Base_URL, "by-date.json?api-key=",
+                                   api_key, "&date=2008-11-08")
+
+# comments by user ID a random number say 2364811
+NYT_API_Comments_by_UserID <- paste0(NYT_API_Base_URL, "user.json?api-key=",
+                                   api_key, "&userID=2364811")
+
+# url on website for Data Scientists to prove their skills and make money (2011)
+# (birth of kaggle perhaps)
+comm_url <- "http://bits.blogs.nytimes.com/2011/11/03/a-site-for-data-scientists-to-prove-their-skills-and-make-money/"
+NYT_API_Comments_by_Url <- paste0(NYT_API_Base_URL, "url.json?api-key=",
+                                   api_key, "&url=", comm_url)
+```
+
+#### Convert the json data from these Uri's to a dataset
+
+```{r JSON_to_DataFrame, echo = TRUE}
+# to get the data we actually want, after experimenting we have to drill down a
+# bit and extract the column that holds the data
+
+Recent_Comments <- fromJSON(NYT_API_Recent_comments)
+rec_comm_df <- Recent_Comments$results$comments
+rec_comm_df
+
+# turns out that there were no recent comments...
+
+Comments_by_Date <- fromJSON(NYT_API_Comments_by_date)
+comm_date_df <- Comments_by_Date$results$comments
+comm_date_df
+
+Comments_by_UserID <- fromJSON(NYT_API_Comments_by_UserID)
+comm_user_df <- Comments_by_UserID$results$comments
+comm_user_df
+
+Comments_by_Url <- fromJSON(NYT_API_Comments_by_Url)
+comm_Url_df <- Comments_by_Url$results$comments
+comm_Url_df
+```

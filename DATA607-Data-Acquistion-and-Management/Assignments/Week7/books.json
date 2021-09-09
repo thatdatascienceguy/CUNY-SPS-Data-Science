@@ -1,0 +1,38 @@
+{ "Book": [
+        {
+            "title": "Doing Data Science: Straight Talk from the Frontline",
+            "Author": [
+                {"name": "Cathy O'Neil"},
+                {"name": "Rachel Schutt"}
+            ],
+            "Publisher": "O'Reilly Media; 1 edition",
+            "ISBN-10": "1449358659",
+            "ISBN-13": "978-1449358655",
+            "pages": 408
+        },
+            
+        {
+            "title": "Learning SQL",
+            "Author": [
+                {"name": "Alan Beaulieu"}
+            ],
+            "Publisher": "O'Reilly Media; 2nd edition",
+            "ISBN-10": "0596520832",
+            "ISBN-13": "978-0596520830",
+            "pages": 338
+        },
+        
+        {
+            "title": "Learning from Data",
+            "Author": [
+                {"name": "Yaser S. Abu-Mostafa"},
+                {"name": "Malik Magdon-Ismail"},
+                {"name": "Hsuan-Tien Lin"}
+            ],
+            "Publisher": "AMLBook",
+            "ISBN-10": "1600490069",
+            "ISBN-13": "978-1600490064",
+            "pages": 213
+        }
+    ]
+}

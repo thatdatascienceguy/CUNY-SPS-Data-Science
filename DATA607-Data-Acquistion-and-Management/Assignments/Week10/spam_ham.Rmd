@@ -1,0 +1,17 @@
+---
+title: "Classifying SPAM or HAM"
+author: "Jonathan Hernandez"
+date: "November 6, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+if (!require(tm)) install.packages("tm")
+if (!require(RTextTools)) install.packages("RTextTools")
+```
+
+```{r get SPAM_HAM_data, echo = TRUE}
+setwd("spam")
+spam<-as.data.frame(readLines(file("0001.bfc8d64d12b325ff385cca8d07b84288")))
+
+```
