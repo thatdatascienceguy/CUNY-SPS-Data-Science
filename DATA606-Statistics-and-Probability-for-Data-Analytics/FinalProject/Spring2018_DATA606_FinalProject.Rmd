@@ -1,0 +1,335 @@
+---
+title: "Spring 2018 DATA606 Final Project - Looking at past NYC School Progress Reports"
+author: "Jonathan Hernandez"
+date: "April 30, 2018"
+output: html_document
+---
+
+## Introduction
+
+This Final project will focus on looking at historical data for NYC school
+
+progress reports for public schools throughout 2006 - 2007.
+
+The research question I would like to address is:
+
+<b>Is the overall school rating predictive of various categorical scores as well 
+as
+
+predictive of Borough of the school, grades and school level? </b>
+
+I will attempt to use multiple linear regression to see what variables affect 
+
+the overall score of a school progress report
+
+I care for this kind of information as I feel that many parents should be aware
+
+and understand the progress and overall performance of the schools they send their
+
+children. Others not only as parents can benefit from this and recommend schools
+
+who are not making enough progress and can reach out and try to make a difference.
+
+Also this dataset and doing analysis may be possibly used to predict the scores
+
+of NYC public schools for other years ahead.
+
+## Data Acquisition
+
+```{r load-packages, message=FALSE}
+# Load some packages beforehand
+if (!require(plyr)) install.packages('plyr')
+if (!require(dplyr)) install.packages('dplyr')
+```
+
+## Load the dataset
+```{r load-dataset, cache=TRUE}
+school_progress_report_scores <- read.csv("2006-2007_School_Progress_Report.csv")
+```
+
+## Data
+
+* Data Collection: Data were collected from the DOE (Department of Education) and
+
+    is freely available to the public.
+
+    https://data.cityofnewyork.us/Education/2006-2007-School-Progress-Report/weg5-33pj
+    
+* Cases: There are 1262 cases in this dataset
+```{r num-cases}
+nrow(school_progress_report_scores)
+```
+
+* Variables: The variables that will be looked at are as follows:
+
+    + DBN (District Borough Number) - categorical
+    + SCHOOL LEVEL - categorical 
+    + GRADE - categorical ordinal
+    + ENVIRONMENT CATEGORY SCORE - numerical continous
+    + PERFORMANCE CATEGORY SCORE - numerical continous
+    + PROGRESS CATEGORY SCORE - numerical continous
+    + QUALITY REVIEW SCORE - categorical ordinal 
+    + OVERALL SCORE - numerical continous
+
+* Type of Study: This was a observational study as the data were collected from 
+
+    the DOE in various NYC schools and observed the scores and grades of
+    performance/progress.
+    
+* Scope of Inference - generalizability: The population of interest is all the 
+
+  public schools of NYC during 2006-2007. The findings of this analysis can be 
+  
+  generalized to this population as we will be looking at the entire dataset and
+  
+  can see if we can predict a overall score of a school that was built during
+  
+  that time.
+
+* Scope of Inference - causality: The data and the model can be used to show some
+
+  type of relationship between the independent variables and the response variable
+  
+  I will show that the scores and location and type of education show a strong
+  
+  relationship towards the overall score NYC schools get.
+  
+lets look at the structure and summary as well as a preview of the dataset in 
+question
+
+```{r}
+str(school_progress_report_scores)
+```
+
+## Data Cleaning
+
+* The custom-built function below will clean up the dataset removing rows
+
+  containing a 'Under Review' as well as convert the DBN values into borough names
+
+  and convert the scores to numerical values for computation and plotting.
+  
+  (A DBN consist of the following format: <district><borough abbreviation><number>)
+
+```{r acquire-clean-dataset, cacne=TRUE}
+source("Clean_progress_report.R")
+progress_report_cleaned <- 
+  clean_school_progress_report(school_progress_report_scores)
+
+summary(progress_report_cleaned)
+```
+
+## Exploratory Data Analysis
+
+Let's look at some of the data visually to understand what kind of distribution
+and behavior
+
+they follow and create some plots.
+
+* Some Histograms
+```{r EDA-hist}
+par(mfrow=c(1,3))
+hist(progress_report_cleaned$Environment_Score)
+hist(progress_report_cleaned$Performance_Score)
+hist(progress_report_cleaned$Progress_Score)
+```
+
+* Some scatterplots of overall score vs the category scores
+```{r EDA-plot-categorical}
+par(mfrow=c(1,4))
+with(progress_report_cleaned, plot(Overall_Score ~ Grade))
+with(progress_report_cleaned, plot(Overall_Score ~ School_Level))
+with(progress_report_cleaned, plot(Overall_Score ~ Quality_Review_Score))
+with(progress_report_cleaned, plot(Overall_Score ~ factor(Borough)))
+```
+
+```{r EDA-mean-sd-correlation}
+# find correlations on the response variable and the explanatory variabls for the
+# overall score and the environment, performance and progress score
+summary(progress_report_cleaned$Overall_Score)
+summary(progress_report_cleaned$Progress_Score)
+summary(progress_report_cleaned$Environment_Score)
+summary(progress_report_cleaned$Performance_Score)
+
+with(progress_report_cleaned, cor(Overall_Score, Environment_Score))
+with(progress_report_cleaned, cor(Overall_Score, Progress_Score))
+with(progress_report_cleaned, cor(Overall_Score, Performance_Score))
+```
+
+It seems like the scores are normally distributed and the distribution of 
+
+overall scores and borough are each nearly normal as well as most of the grades.
+
+This suggests that the scores and the other variables have a strong effect
+
+## Statistical Data Analysis
+
+To see which variables are strong predictors of overall grade score, I will use
+
+the concept of multiple linear regression to create a linear equation best
+fitting
+
+the data.
+
+we will add all the variables to the equation as follows:
+
+\[
+\begin{aligned}
+  \widehat{overallscore} = \beta_0 + \beta_1*\widehat{borough} + 
+  \beta_2*\widehat{school level} + 
+  \beta_3*\widehat{grade} + \beta_4*\widehat{enviornment} + \\
+  \beta_5*\widehat{performance} + \beta_6*\widehat{progress} + 
+  \beta_7*\widehat{qualityreview}
+\end{aligned}
+\]
+
+and by looking at such characteristics like correlation and p-value and the beta
+
+value parameter esitmates, we can find an equation that best fits the model we are 
+
+trying to accomplish while minimizing any residuals.
+
+To get our linear model we'll use the lm() function to get coefficent esitmates
+
+as well as R-squared and p-values.
+
+```{r fit-model}
+# fitting our linear model
+lm_overall_score <- lm(Overall_Score ~ Borough + School_Level + 
+                         Grade + Environment_Score + 
+                         Performance_Score + 
+                         Progress_Score + Quality_Review_Score,
+                       data = progress_report_cleaned)
+
+# look at the summary of our model
+summary(lm_overall_score)
+```
+
+While the R-Squared value is very close to 1, we can remove predictors that have
+
+a large p-value as a large p-value would indicate that the null hypothesis should
+
+not be rejected and the predictor can be removed from the model.
+
+Looking at the summary of the linear model, the Quality Review Score
+
+can be removed from the model as they have large p-values and may not have no
+
+relationship in the overall score.
+
+Using the updated model below we get new R-squared, p-values, coefficents etc:
+
+```{r updated-lm}
+lm_overall_score_updated <- lm(Overall_Score ~ Borough + School_Level + 
+                                 Grade + Environment_Score + Performance_Score + 
+                                 Progress_Score, data = progress_report_cleaned)
+summary(lm_overall_score_updated)
+```
+
+Thus the new updated fitted model is:
+
+\[
+\begin{aligned}
+  \widehat{overallscore} = 10.985 - 0.510*\widehat{borough_{Brooklyn}} -
+  0.787*\widehat{borough_{Manhattan}} - 0.597*\widehat{borough_{Queens}} \\ + 
+  0.807*\widehat{schoollevel_{HS}} + 0.730*\widehat{schoollevel_{K to 8}} + 
+  0.843*\widehat{schoollevel_{MS}} \\ - 3.299*\widehat{grade_{B}} -
+  5.502*\widehat{grade_{C}} - 7.017*\widehat{grade_{D}} - 
+  8.170*\widehat{grade{F}} \\+ 12.990*\widehat{environment} + 
+  25.890*\widehat{performance} + 51.670*\widehat{progress}
+\end{aligned}
+\]
+
+Note that for the Borough, school level and grade, the values are either 1 or 0
+
+depending on the value of the categorical variables.
+
+For exmaple, if a Middle School is added at the time to reside in Brooklyn and 
+got a grade of
+
+say B,
+
+the equation would be as follows:
+
+\[
+\begin{aligned}
+  \widehat{overallscore} = 10.985 - 0.510* (1) -
+  0.787*(0) - 0.597*(0) \\ + 
+  0.807*(0) + 0.730*(0) + 
+  0.843*(1) \\ - 3.299*(1) -
+  5.502*(0) - 7.017*(0) - 
+  8.170*(0) \\+ 12.990*\widehat{environment} + 
+  25.890*\widehat{performance} + 51.670*\widehat{progress} \\
+  = (10.985 - 0.510 + 0.843 - 3.299) + 12.990*\widehat{environment} + 
+  25.890*\widehat{performance} + 51.670*\widehat{progress}
+\end{aligned}
+\]
+
+```{r model-test}
+# plot the distirbution of residuals
+# if a valid model the distribution should be nearly normal (bell-shaped)
+hist(lm_overall_score_updated$residuals)
+
+#plotting a linear model gives us normal probability plots, residual plots and 
+# residual vs leverage plots
+par(mfrow=c(2,2))
+plot(lm_overall_score_updated)
+```
+
+We see the distribution of residuals is nearly normal, few outliers and the normal
+
+probability plot and leverage are fairly reasonable for this model.
+
+Computing 95% confidence intervals for each predictor Intervals show that we are
+
+95% confident the true parameter estimates/slopes lie within the ranges below:
+
+Let $H_{0}$ = parameter estimates = 0
+Let $H_{A}$ = parameter estimates != 0
+
+```{r conf-intervals}
+confint(lm_overall_score_updated)
+```
+
+We looked at each p-value in the original model and removed predictors that had
+
+a high p-value meaning that we would fail to reject the null hypothesis and that
+
+predictor has no influence on the response variable.
+
+## Conclusion
+
+* We saw in our model that there is a strong positive linear relationship between
+
+  overall scores and explanatory variables grades, borough, quality review, type
+
+  of school and various scores. What has been shown is that various scores had the
+
+  lowest p-values meaning they contribute the most to the overall scores along with
+
+  grades. If we simulated sample test schools whose scores and other categorical 
+
+  explanatory variables follow the similar distribution and mean/standard deviation
+
+  as the original dataset, we would expect to get a overall score of that school 
+
+  that follows the distribution of that school and with good prediction.
+  
+* One idea to further test this model is to also look at a similar dataset 
+
+  containing NYC school progress reports for later years like 2007-2008, 2008-2009
+  
+  and so on. I could then build a linear (or non-linear) model to not only
+  
+  accomidate for the scores/grades/location but factoring in time as well and
+  
+  build a model that will predict the overall scores of NYC schools for years
+  
+  down the road. It would be helpful for parents and staff to know which schools
+  
+  will have a good chance of having good progress and ones below the standard.
+  
+# Graphs, code and dataset are available here:
+  
+  https://github.com/jonathan1987/DATA606
+

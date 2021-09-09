@@ -1,0 +1,97 @@
+---
+title: "Spring 2018 DATA606 Final Project Proposal"
+author: "Jonathan Hernandez"
+date: "April 30, 2018"
+output: html_document
+---
+
+```{r school-progress-report, echo=FALSE, cache=TRUE, results='hide'}
+school_progress_report_scores <- read.csv("2006-2007_School_Progress_Report.csv")
+```
+
+This is the DATA606 Project Proposal. This project will look at a historical NYC
+
+School Progress Report dataset from 2006-2007.
+
+Research Question:
+
+Is the overall school rating predictive of various categorical scores as well as
+
+predictive of Borough of the school, grades and school level?
+
+Cases:
+
+There are 
+
+```{r,echo=FALSE}
+nrow(school_progress_report_scores)
+```
+in the dataset.
+
+Type of Study:
+
+This is an observational study on past data.
+
+Data Source:
+
+Dataset is available here: 
+
+https://data.cityofnewyork.us/Education/2006-2007-School-Progress-Report/weg5-33pj
+
+The data comes from the NYC OpenData website provided by the Department of 
+Education (DOE).
+
+Explanatory Variables:
+
+The explanatory variables in question are:
+
+- DBN (District Borough Number) - categorical
+- SCHOOL LEVEL - categorical 
+- GRADE - categorical ordinal
+- ENVIRONMENT CATEGORY SCORE - numerical continous
+- PERFORMANCE CATEGORY SCORE - numerical continous
+- PROGRESS CATEGORY SCORE - numerical continous
+- QUALITY REVIEW SCORE - categorical ordinal
+
+Response Variable
+
+The response variable is 
+
+- OVERALL SCORE - numerical continous
+
+Relevant Summary Statistics:
+
+- Understanding the structure and summary
+```{r}
+str(school_progress_report_scores)
+```
+
+Data Cleanup:
+
+Convert score variables to numeric from factor
+```{r}
+school_progress_report_scores$ENVIRONMENT.CATEGORY.SCORE <- 
+  as.numeric(as.character(school_progress_report_scores$ENVIRONMENT.CATEGORY.SCORE))
+
+school_progress_report_scores$PERFORMANCE.CATEGORY.SCORE <- 
+  as.numeric(as.character(school_progress_report_scores$PERFORMANCE.CATEGORY.SCORE))
+
+school_progress_report_scores$PROGRESS.CATEGORY.SCORE <- 
+  as.numeric(as.character(school_progress_report_scores$PROGRESS.CATEGORY.SCORE))
+
+school_progress_report_scores$OVERALL.SCORE <- 
+  as.numeric(as.character(school_progress_report_scores$OVERALL.SCORE))
+```
+Exploratory Data Analysis:
+
+```{r EDA-hist}
+hist(school_progress_report_scores$ENVIRONMENT.CATEGORY.SCORE)
+hist(school_progress_report_scores$PERFORMANCE.CATEGORY.SCORE)
+hist(school_progress_report_scores$PROGRESS.CATEGORY.SCORE)
+```
+The 3 histograms of our numerical predictors are very near-normal
+
+```{r EDA-plot-categorical}
+with(school_progress_report_scores, plot(OVERALL.SCORE ~ GRADE))
+with(school_progress_report_scores, plot(OVERALL.SCORE ~ SCHOOL.LEVEL.))
+```
