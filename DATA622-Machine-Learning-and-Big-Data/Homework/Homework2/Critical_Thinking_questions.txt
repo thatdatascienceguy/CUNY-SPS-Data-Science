@@ -1,0 +1,18 @@
+Critical Thinking (3 points total) Modify this ReadMe file to answer the following questions directly in place.
+Kaggle changes links/ file locations/login process/ file content
+
+Answer: If kaggle changes links, then one would change the python code to check if the link or file  exists otherwise throw an exception.
+
+We run out of space on HD / local permissions issue - can't save files
+
+Answer: Check if filespace is there (using df or other similar tool in windows and if no filespace, place in an alternative location. Also, one
+could add more space if saving to a AWS, GCP cloud provider or offload it to an external server.
+If no permissions to place the file, then either grant permissions appropriately then re-run the code.
+
+Someone updated python packages and there is unintended effect (functions retired or act differently)
+
+Answer: First check if the packages are missing, otherwise check for any official documentation of new/updated functions/packages and update code accordingly.
+
+Docker issues - lost internet within docker due to some ip binding to vm or local routing issues( I guess this falls under lost internet, but I am talking more if docker is the cause rather then ISP)
+
+Answer: Examine docker logs if any and troubleshoot.

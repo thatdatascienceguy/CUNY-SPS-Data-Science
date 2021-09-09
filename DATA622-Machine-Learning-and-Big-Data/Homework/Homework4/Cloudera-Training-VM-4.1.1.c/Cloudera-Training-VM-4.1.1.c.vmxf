@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Foundry>
+<VM>
+<VMId type="string">52 5d d2 85 bd cb ee 3b-34 30 84 3a c8 03 47 76</VMId>
+<ClientMetaData>
+<clientMetaDataAttributes/>
+<HistoryEventList/></ClientMetaData>
+<vmxPathName type="string">Cloudera-Training-VM-4.1.1.c.vmx</vmxPathName></VM></Foundry>
