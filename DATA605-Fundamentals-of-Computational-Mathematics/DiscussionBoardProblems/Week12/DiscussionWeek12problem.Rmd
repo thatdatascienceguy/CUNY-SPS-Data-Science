@@ -1,0 +1,153 @@
+---
+title: 'Week 12: Regression Analysis in R: Multiple Linear Regression'
+author: "Jonathan Hernandez"
+date: "November 12, 2018"
+output:
+  html_document: default
+---
+
+    Using R, build a multiple regression model for data that interests you.
+    Include in this model at least one quadratic term,bone dichotomous term, 
+    and one dichotomous vs. quantitative interaction term. 
+    Interpret all coefficients. Conduct residual analysis. Was the linear model appropriate? Why or why not?
+    
+- For this discussion, I will look at the Kaggle Dataset "Medical Cost Personal Datasets"
+link can be found here to download: https://www.kaggle.com/mirichoi0218/insurance
+
+- This dataset looks at medical insurance costs charges for various people based on several
+factors like number of children, region of residency, age etc.
+
+- I will make a multiple linear regression model and make a best-fit line for computing medical costs.
+
+- Start by loading the data and viewing attributes
+
+```{r}
+insurance <- read.csv("insurance.csv")
+dim(insurance)
+summary(insurance)
+str(insurance)
+head(insurance, n = 10)
+```
+
+- Dataset is well clean and tidy; nothing else to do to it.
+Let's plot some graphs.
+
+```{r}
+par(mfrow=c(1,2))
+hist(insurance$bmi, xlab = "BMI (Body Mass Index)",
+     main = "Histogram of BMI")
+hist(insurance$charges, xlab = "Medical Charges",
+     main = "Histogram of Medical Charges") # looks more right-skewed
+
+# let's do some plotting of charges against other factors like sex and smoker and region
+par(mfrow=c(1,3))
+with(insurance, plot(charges ~ smoker + sex + region))
+```
+
+- We see that BMI is nearly normally distributed, medical charges is right-skewed and
+there are many outliers for high medical charges against both genders and various regions.
+
+- We also see that the median is about the same for all regions, and genders.
+
+- Note that for smokers, medical charges are much higher than normal ones which we
+should expect.
+
+- Now, let's fit a multiple regression model, let have the explanatory variables as
+
+    - sex (categorical)
+    - bmi (numerical, continous)
+    - age (numerical, discrete)
+    - smoker (categorical)
+    - charges (numerical, continous)
+    
+- Let's make a multiple regression model of the following equation:
+
+$$
+\begin{aligned}
+\widehat{charges} = \beta_0 + \beta_1 * Sex + \beta_2 * bmi + 
+\beta_3 * age + \beta_4 * smoker + \beta_5 (bmi*sex)
+\end{aligned}
+$$
+```{r}
+lm_insurance <- lm(charges ~ sex + bmi + age + smoker + bmi*sex, data = insurance)
+summary(lm_insurance)
+par(mfrow=c(2,2))
+hist(lm_insurance$residuals, main = "Histogram of Residuals", xlab= "")
+plot(lm_insurance$residuals, fitted(lm_insurance))
+qqnorm(lm_insurance$residuals)
+qqline(lm_insurance$residuals)
+```
+
+- We see that the residuals histogram is somewhat normal but the residuals vs fitted
+values doesn't show constant variance which is not good for a multiple regression model.
+
+
+- The equation of this multiple regression model is as follows:
+
+$$
+\begin{aligned}
+\widehat{charges} = -11717.37 + 54.1*sex + 325.78*bmi + 259.47*age + 23836.07*smoker - 5.33(bmi*sex)
+\end{aligned}
+$$
+
+- Note the variables
+
+    - sex = 1 for male and 0 for female
+    - smoker = 1 for male and 0 for female
+    
+- What does this tell us? Let's look at the details of the summary in more detail
+
+    - Coefficients:
+        - Intercept: This tells us that leaving all other terms constant, on average
+        the estimated medical charge is about $-11717.36 which logically won't make sense
+        and is good there are other terms in the model.
+        - Sex: If a person is male and leaving all other terms constant, he can expect
+        to pay about $54.1 in medical costs.
+        - BMI: Leaving all other terms constant, a person can be expected to pay about
+        $325.78 in medical charges per BMI value.
+        - Age: Leaving all other terms constant, a person can be expected to pay about
+        $259.47 in medical expenses multiplied by their age (A 31 year old will pay about $8043.57)
+        - Smoker: A person who smokes and leaving all variables constant can expect to pay $23836.07
+        - Sex*BMI: A male can expect to pay holding all other variables constant can expect to pay
+        $-5.326 which doesn't make sense logically.
+    - P-values of coefficients:
+        - The p-values of the intercept, bmi, age and male smokers are very low and we can reject the 
+        null hypothesis (H_0 = 0) and favor the alternative (H_A != 0) that is the true coefficients is not 0
+        - For Males and Male*bmi, we fail to reject the null hypothesis and thus these coefficients are very
+        close to 0 and can be excluded in our model.
+    - Residual Standard Error: The residual standard error of 6097 is the standard deviation and is a bit far
+    from the good fit of points.
+    - R-squared/Adjusted R^2: values of 0.7475 and 0.7466 respectively, this means that about 75% of the data
+    fall into the regression line.
+    - F-statistic: value of 788.6 with a small p-value < 2.2e-16 means that the features selected are better
+    than the intercept-only model which as described before makes sense as a intercept only model gives a negative
+    medical cost which doesn't apply or make sense.
+
+- Let's predict the medical cost of myself:
+
+    - I'm 31 years old: Age = 31
+    - I don't smoke: smoke = 0
+    - I'm male: male = 1
+    - My BMI is: 31.3
+  
+```{r}
+my_predicted_medical_cost <- predict(lm_insurance,
+                                     data.frame(age=31, smoker="no", 
+                                                bmi=31.3, sex="male"))
+my_predicted_medical_cost
+```
+
+- So the multiple regression model that I made says my approximate medical costs is 
+about $6410.44.
+
+- So far this year on a personal note, I've only spent about $350 in medical costs,
+which my predicted model is no where near close and overestimates my medical costs!
+
+- I would not be comfortable with using the model above as there are coefficients that can be removed or probably
+added for better accuracy and properly modeling and predicting medical costs. The residual standard error as well
+as the Q-Q plots show that the model is not a good fit for the data. One good thing I can say about the model
+is that the BMI and Age coefficients make sense as the more your BMI is and older, you are more likley to have 
+more health problems and have more medical costs to pay.
+
+- Future work can be done to add more coefficients, transforms and possibly use non-linear regression to better predict 
+medical costs.

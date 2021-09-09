@@ -1,0 +1,117 @@
+---
+title: 'Week 10: Markov Chains & Random Walks'
+author: "Jonathan Hernandez"
+date: "October 30, 2018"
+output:
+  html_document: default
+---
+
+    18. Assume that a student going to a certain four-year medical school in northern
+    New England has, each year, a probability q of flunking out, a probability r of
+    having to repeat the year, and a probability p of moving on to the next year
+    (in the fourth year, moving on means graduating).
+
+    (a) Form a transition matrix for this process taking as states F, 1, 2, 3, 4, and
+    G where F stands for flunking out and G for graduating, and the other states represent
+    the year of the study
+    
+Answer: the matrix can be represented as the below. We got two absorbing states that is
+
+the Flunking state and the Graduating state which are states that it is impossible to leave
+
+(Flunk and you can't go back and Graduate and you don't come back)
+```{r}
+# Transition matrix P^1
+P <- matrix(c(1, 0, 0, 0, 0, 0, 
+              "q", "r", "p", 0, 0, 0, 
+              "q", 0, "r", "p", 0, 0,
+              "q", 0, 0, "r", "p", 0,
+              "q", 0, 0, 0, "r", "p",
+              0, 0, 0, 0, 0, 1), nrow = 6, ncol = 6, byrow = TRUE)
+P
+```
+
+    (b) For the case q = 0.1, r = 0.2, p = 0.7 find the time a beginning student can
+    expect to be in the second year. How long should this student expect to be in the medical
+    school?
+    
+Answer: How long the student can expect to be in the second year is by looking at the matrix
+
+$N = (I -Q)^{-1}$ and $n_{ij}$ gives the expected number of times that the process in the transient state if
+
+it started in state $s_i$
+
+There are two absorbing states and 4 transient states, let r = # of absorbing states and t = # transient states.
+
+$I = 4 x 4$ identity matrix and 
+
+Q is columns 1 through 4 and rows 1 =4 that is
+
+```{r}
+p <- 0.7
+q <- 0.1
+r <- 0.2
+
+# replace strings with their respective probabilities
+P <- gsub("p", p, P)
+P <- gsub("q", q, P)
+P <- gsub("r", r, P)
+P <- mapply(P, FUN = as.numeric)
+P <- matrix(data=P, ncol = 6, nrow = 6, byrow = FALSE)
+rownames(P) <- c("F", "1", "2", "3", "4", "G")
+colnames(P) <- c("F", "1", "2", "3", "4", "G")
+P
+# Compute Q
+Q <- P[c("1", "2", "3", "4"), c("1", "2", "3", "4")]
+Q
+
+# Compute I
+I <- diag(nrow = nrow(Q))
+I
+
+# Compute N
+library(Matrix)
+N <- solve(I - Q)
+N
+```
+
+for state $s_1$ that is the first year and looking at state $s_2$ the 2nd year,
+
+the 1st row and 2 column it is expected to take the student 1.09 times or 1.09 years to get
+
+to the second year.
+
+For the expected time the student will be in medical school we need to use the formula
+
+$t = Nc$ where t is a column of vector whose i'th entry is $t_i$ and the expected number of steps before the chain
+
+is absorbed. c is the nrow(N) x 1 column vector whose entries are all 1.
+
+```{r}
+c_vector <- rep(1, nrow(N))
+t <- N %*% c_vector
+t
+```
+
+Looking at the first entry, a beginning student should expect to graduate in about 4.13 years,
+
+2nd year will take about 3.3 years, 3rd year will take about 2.34 years and in the final year will take about 1.25 years.
+
+    (c) Find the probability that this beginning student will graduate.
+
+Answer: we compute the Absorption probability $B = NR$ where $b_{ij}$ is the probability that an absorbing chain
+
+will be absorbed in the absorbing state $s_j$ when it starts in $s_1$.
+
+R is the rows of states 1 through 4 and columns of F and G in the orginal matrix P(absorbing states)
+
+```{r}
+R <- P[c("1", "2", "3", "4"), c("F", "G")]
+R
+B <- N %*% R
+B
+```
+
+By looking at the first row that is the 1st year of the beginning student and the 2nd column,
+
+we can see that the probability of this beginning student will graduate will be about 58.6%

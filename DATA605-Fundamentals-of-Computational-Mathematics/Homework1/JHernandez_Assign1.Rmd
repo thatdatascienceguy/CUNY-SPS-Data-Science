@@ -1,0 +1,100 @@
+---
+title: "DATA605 Homework1"
+author: "Jonathan Hernandez"
+date: "August 28, 2018"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+# Homework Assignment 1
+
+## Problem Set 1
+
+1. Calculate the dot product u.v where u = [0.5;0.5] and v = [3; -4]
+
+Answer: by using %*% operator to do dot product
+```{r question1}
+u = c(0.5, 0.5)
+v = c(3,-4)
+
+dot_product <- u %*% v
+dot_product
+```
+
+2. What are the lengths of u and v? Please note that the mathematical notion of 
+
+the length of a vector is not the same as the computer science definition.
+
+Answer:
+```{r question2}
+# math wise finidng the magnitude of a vector
+mag_u <- sqrt(u[1]^2 + u[2]^2)
+mag_v <- sqrt(v[1]^2 + v[2]^2)
+
+c(mag_u, mag_v)
+```
+
+3. What is the linear combination: 3u - 2v?
+
+Answer:
+```{r question3}
+3*u - 2*v
+```
+
+4. What is the angle between u and v?
+
+Answer: The angle $\theta$ between them is defined as
+
+$\theta$ = $arccos(u*v / (||u|| * ||v||))$ (arc cosine of the inner product of
+
+the two vectors divided by the product of their norms)
+
+```{r question4}
+angle <- acos(dot_product / (mag_v * mag_u)) * (180 / pi) # in degrees
+angle
+```
+
+## Problem Set 2
+
+Create a function that solves a system of equations (3 variables and 3 constraints)
+
+```{r solveSLE}
+solveSLE <- function(A, b){
+  # get dimensions of matrix A
+  m <- cbind(A,b)
+  m_row <- nrow(m)
+  n_col <- ncol(m)
+  pivot <- 1
+  
+  for(r in 1:m_row) {
+    if ( n_col <= pivot ) break; # if only one column or less, exit
+    i <- r
+    while( m[i,pivot] == 0 ) { # for entries for 0 
+      i <- i + 1 # go to next row
+      if ( m_row == i ) { # find pivot
+        i <- r
+        pivot <- pivot + 1 # move pivot until m[i,pivot] is not zero
+        if ( n_col == pivot ) return(m)
+      }
+    }
+    # swap rows (next three lines)
+    trow <- m[i, ]
+    m[i, ] <- m[r, ]
+    m[r, ] <- trow
+    m[r, ] <- m[r, ] / m[r, pivot]
+    for(i in 1:m_row) {
+      if ( i != r )
+        m[i, ] <- m[i, ] - m[r, ] * m[i, pivot] # row operations
+    }
+    pivot <- pivot + 1
+  }
+  return(m[,n_col]) # last column is the x coefficients
+}
+
+# test out function
+A <- matrix(nrow = 3, ncol = 3, data = c(1, 2, -1, 1, -1, -2, 3, 5, 4))
+b <- c(1, 2, 6)
+solveSLE(A, b)
+```

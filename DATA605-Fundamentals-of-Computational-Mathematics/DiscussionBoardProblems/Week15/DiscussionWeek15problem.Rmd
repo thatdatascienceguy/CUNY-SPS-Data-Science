@@ -1,0 +1,49 @@
+---
+title: 'Week 15: Functions of Several Variables'
+author: "Jonathan Hernandez"
+date: "November 12, 2018"
+output: html_document
+---
+
+    Projectile Motion: The x-value of an object moving under the principles of
+    projectile motion is x(theta, v_0, t) = (v_0*cos(theta))*t. A particular
+    projectile is fired with an intital velocity of v_0 = 250 ft/s and an angle of
+    elevation of theta = 60 degrees. It travels a distance of 375ft in 3 seconds.
+    
+    Is the projectile more sensitive to errors in initial speed or angle of evelation?
+    
+- We are given the information below:
+
+    - $v_0 = 250$
+    - $\theta = 60^{\circ}$
+    - $t = 3$
+    - $x(\theta, v_0, t) = (v_0cos(\theta))t$
+
+- To see which variable is sensitive to errors, we compute the total differential for 3
+variables defined by
+
+$$
+\begin{aligned}
+dz = x_\theta(\theta, v_0, t)d\theta + x_{v_0}(\theta, v_0, t)dv_0 + x_t(\theta, v_0, t)dt
+\end{aligned}
+$$
+
+- Where the $x_\theta, x_t$ and, $x_{v_0}$ are the first order partial derivatives with respect
+to $\theta$, t and $v_0$ respectively. After computing the partial derivatives, we then plug
+in the numbers given to us and inspect which variables are subject to change.
+
+$$
+\begin{aligned}
+dz = x_\theta(\theta, v_0, t)d\theta + x_{v_0}(\theta, v_0, t)dv_0 + x_t(\theta, v_0, t)dt \\
+= -v_0sin(\theta)t \,d\theta + cos(\theta)t \,d{v_0} + v_0cos(\theta) \,dt \\
+=-750sin(60^\circ) \,d\theta + 3cos(60^\circ) \,d{v_0} + 250cos(60^\circ) \,dt \\
+=-375\sqrt{3} \,d\theta + 1.5 \,d{v_0} + 125 \,dt
+\end{aligned}
+$$
+
+- To find whether the initial velocity $v_0$ or angle of elevation $\theta$ are the most sensitive,
+we notice that for small changes in $d\theta$, dz is greatly reduced whereas if $dv_0$ is changed
+in small increments, dz increases only slightly. Also note the coefficients of $d\theta$ and $dv_0$,
+$d\theta$ coefficient is about 433 times larger than $dv_0$ only in the case when the initial velocity is large.
+
+- Thus the projectile is more sensitive to errors in angle of elevation than the initial velocity.

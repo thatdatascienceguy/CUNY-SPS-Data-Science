@@ -1,0 +1,102 @@
+---
+title: "Homework 11"
+author: "Jonathan Hernandez"
+date: "November 2, 2018"
+output: pdf_document
+---
+
+    Using the "cars" dataset in R, build a linear model for stopping distance as a function of speed and
+    replicate the analysis of your textbook chapter 3 (visualization, quality evaluation of the model, and
+    residual analysis.)
+
+
+### Load the built-in R "cars" dataset
+
+```{r}
+data("cars")
+head(cars, n = 10)
+```
+
+### Summary of the dataset
+
+```{r}
+summary(cars)
+```
+
+### Dimensions of the dataset
+
+```{r}
+dim(cars)
+```
+
+### Visualize the data
+
+```{r}
+with(cars, plot(speed, dist, 
+                xlab = "Speed (mph)",
+                ylab = "Stopping Distance (ft)"))
+```
+
+### Fit a Linear Model $distance = a_0 + a_1*speed$
+
+```{r}
+# linear model
+lm_cars <- lm(dist ~ speed, data = cars)
+lm_cars
+```
+
+- Thus y-intercept or $a_0 = -17.579$ and the slope $a_1 = 3.932$
+and the linear model is
+
+```{r}
+with(cars, plot(speed, dist, 
+                xlab = "Speed (mph)",
+                ylab = "Stopping Distance (ft)"))
+abline(lm_cars)
+```
+
+$$
+\begin{aligned}
+dist = -17.579 + 3.932*speed
+\end{aligned}
+$$
+
+### Quality of the Model
+
+```{r}
+summary(lm_cars)
+```
+
+- We can see the summary statistics of the residuals which are the differences between
+
+the actual measured values and the values on the line. A good-fit model would have the residuals
+
+to be nearly standard normal. The median should be near 0 which is the case here.
+
+```{r}
+hist(lm_cars$residuals, xlab = "", main = "Histogram of Residuals")
+```
+
+- A key statistic is $R^2$ value which shows that the model explains about 65% of the
+
+data's variation which for a linear model is not too bad.
+
+- Also looking at the p-values, we see that the probability that the speed variable is not
+
+relevant is very small at about $1.49 * 10^{-12}$ This means that speed plays a key predictor in
+
+determining stopping distance and a strong dependency.
+
+### Residual Analysis
+
+```{r}
+plot(fitted(lm_cars), resid(lm_cars))
+```
+
+- Residuals are nearly uniformly scattered and approximately constant variance.
+
+- A Quantile vs Quantile or Q-Q plot
+```{r}
+qqnorm(resid(lm_cars))
+qqline(resid(lm_cars))
+```

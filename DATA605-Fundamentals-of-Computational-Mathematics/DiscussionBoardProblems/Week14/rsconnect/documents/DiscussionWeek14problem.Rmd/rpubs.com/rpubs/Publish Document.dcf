@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/439189/824d9960cc6e41c6bcada956cbf79b11
+bundleId: https://api.rpubs.com/api/v1/document/439189/824d9960cc6e41c6bcada956cbf79b11
+url: http://rpubs.com/JHernandez/439189/edit
+when: 1542043579.1101

@@ -1,0 +1,78 @@
+---
+title: 'Week 14: Taylor Series Approximations'
+author: "Jonathan Hernandez"
+date: "November 12, 2018"
+output:
+  html_document: default
+---
+
+    In Exercises 31-32, approximate the value of the given definite integral by
+    using the first 4 nonzero terms of the integrand's Taylor series.
+    
+
+- This discussion will cover only #31 that is
+$$
+\begin{aligned}
+\int^{\sqrt \pi}_{0} sin(x^2)
+\end{aligned}
+$$
+
+- First, let's compute the Taylor series for $sin(x^2)$. We know that the Taylor
+series of $sin(x)$ is
+
+$$
+\begin{aligned}
+sin(x) = \sum^{\infty}_{n=0} (-1)^n x^{2n+1}/(2n+1)! \\
+= x - x^3/3! + x^5/5! - x^7/10! + ...
+\end{aligned}
+$$
+
+- We can compute the Taylor series for $sin(x^2)$ by just simply substituting x for x^2
+
+$$
+\begin{aligned}
+sin(x^2) = \sum^{\infty}_{n=0} (-1)^n x^{2(2n+1)}/(2n+1)! \\
+= \sum^{\infty}_{n=0} (-1)^n x^{4n+2}/(2n+1)! \\
+= x^2 - x^6/3! + x^{10}/5! - x^{14}/7! + ...
+\end{aligned}
+$$
+
+- Now lets substitute the above equation into the integral
+
+$$
+\begin{aligned}
+\int^{\sqrt \pi}_{0} sin(x^2) \,dx= \int^{\sqrt \pi}_{0} \sum^{\infty}_{n=0} (-1)^n x^{4n+2}/(2n+1)! \,dx\\
+= \int^{\sqrt \pi}_{0}x^2 - x^6/3! + x^{10}/5! - x^{14}/7! + ... \,dx \\
+= \big[x^3/3 - x^7/(7*3!) + x^{11}/(11*5!) - x^{15}/(15*7!) + ...\big]^{\sqrt \pi}_0 \\
+= (\sqrt \pi)^3/3 - (\sqrt \pi)^7/(7*3!) + (\sqrt \pi)^{11}/(11*5!) - (\sqrt \pi)^{15}/(15*7!)+ ...
+\end{aligned}
+$$
+
+let's try to estimate the numerical approximation of the first 4 terms above to compute
+$\int^{\sqrt \pi}_{0} sin(x^2)$
+
+```{r}
+terms <- 0:3 # number of nonzero terms to use
+
+# Function to compute the approximate definite integral of sin(x^2) from a non-zero
+# upper limit to 0 (lower limit) using Taylor Series
+integral_sin_x_squared_func <- function(x, n){
+  numerator <- x^(4*n+3)
+  denominator <- (4*n+3) * factorial(2*n+1)
+  return(sum(((-1)^n) * (numerator / denominator)))
+}
+
+sin_x_squared_approx <- integral_sin_x_squared_func(pi^0.5, terms)
+sin_x_squared_approx
+```
+
+- The above value is the approximation of the integral using the first 4 terms in
+the Taylor Series of $sin(x^2)$
+
+- For n terms, the approximate solution for the integral is
+
+$$
+\begin{aligned}
+\sum^{\infty}_{n=0} (-1)^n \sqrt \pi^{4n+3}/[(4n+3) (2n+1)!]
+\end{aligned}
+$$

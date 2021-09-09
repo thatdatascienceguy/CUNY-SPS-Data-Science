@@ -1,0 +1,44 @@
+# get dimensions of matrix A
+  A <- cbind(A,b)
+  m_row <- nrow(A)
+  n_col <- ncol(A)
+  
+  # inital row and column to start as the pivot
+  x <- 1 # pivot on the first upper row
+  y <- 1 # pivot on the first upper column
+
+  while(x <= m_row-1 & y <= n_col){ 
+    #print(paste("x ", sep = " ", x))
+    #print(paste("y ", sep = " ", y))
+    # with the first row starting and going up to the last column
+    # find the row with the largest value in a given column
+    index <- which(A[,y] == max(A[,y]))
+    #print(paste("index ", sep = " ", index))
+    # check if a column has no pivot that is it is set to zero; like solving a SLE,
+    # go to the next column
+    if(A[index,y] == 0){
+      y <- y + 1
+      }
+    else{
+      A[c(x,index),] <- A[c(index,x),] # swap rows operation
+      for(i in (x+1):(m_row)){
+        #print(paste("i ", sep = " ", i))
+        f <- A[i, y] / A[x, y]
+        # Anything lower in the pivot column set to zero
+        A[i, y] <- 0
+        for(j in (y+1):(n_col-1)){
+          #print(paste("j ", sep = " ", j))
+          A[i, j] <-A[i, j] - A[x, j] * f
+        }
+      }
+    }
+    x <- x + 1
+    y <- y + 1
+  }
+  return(A)
+}
+
+# test out function
+A <- matrix(nrow = 3, ncol = 3, data = c(1, 2, -1, 1, -1, -2, 3, 5, 4))
+b <- c(1, 2, 6)
+solveSLE(A, b)

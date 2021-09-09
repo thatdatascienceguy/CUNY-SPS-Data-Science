@@ -1,0 +1,123 @@
+---
+title: "Homework4"
+author: "Jonathan Hernandez"
+date: "September 13, 2018"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+## Homework Assignment 4
+
+## Problem set 1
+
+```{r}
+A <- matrix(c(1, -1, 2, 0, 3, 4), nrow = 2, ncol = 3)
+A
+
+# compute X = AA^T
+X <- A %*% t(A)
+
+# compute Y = A^TA
+Y <- t(A) %*% A
+
+print("Matricies X and Y: ")
+list(X,Y)
+
+# Compute eigenvalues and eigenvectors of X and Y
+print("Eigenvalues and Eigenvectors of X and Y:")
+eig_X <- eigen(X)
+eig_Y <- eigen(Y)
+
+list(eig_X, eig_Y)
+
+# compute SVD 
+
+svd_A <- svd(A, nu = 2, nv = 3)
+svd_A
+```
+
+### Let's look at the singular vectors d, left singular u and right singular v
+
+### for A = UDV' where V' is the complex conjugate (or in this case of real numbers)
+
+### just the conjugate
+
+### For X an d Y
+
+```{r}
+list(eig_X$vectors, svd_A$u)
+
+list(eig_Y$vectors, svd_A$v)
+```
+
+### We can see that the values (not the sign) for u and v are the eigenvectors
+
+### of X and Y respectively.
+
+### Let's look at the non-zero eigen values of X and Y and show they are the same:
+
+```{r}
+list(eig_X$values, eig_Y$values[1:2])
+```
+
+### And squaring of either the eigenvalue of X or Y yields the non-zero singular values of A
+
+```{r}
+list(eig_X$values, svd_A$d[1]^2)
+
+list(eig_Y$values[1:2], svd_A$d[2]^2)
+```
+
+
+```{r}
+# create the function myinverse which will be a function that computes the inverse of a 
+# well-conditioned full-rank square matrix using co-factors
+
+myinverse <- function(A){
+  # check if det(A) = 0 otherwise continue
+  n <- nrow(A) # number of rows
+  if( det(A) == 0 || n == 1){
+    return("Matrix is not invertible. Exiting")
+  }
+  
+  if (n == 2){ # 2x2 matrix compute inverse manually
+    return((1 / det(A)) * matrix(c(A[2, 2], -A[2, 1], -A[1, 2], A[1, 1]),
+                                 nrow = 2, ncol = 2))
+  }
+  
+  # create cofactor matrix set it to be initially all 0's
+  # simple case a 2 x 2 matrix
+  C <- matrix(0, nrow = n, ncol = n)
+  # loop through whole matrix A computing minors and cofactor matrix entries
+  for(i in 1:n){
+      for(j in 1:n){
+        minor <- det(A[-i, -j]) # determinant of minor[i,j]
+        C[i, j] <- (-1)^(i + j) * minor # cofactor matrix C[i,j]
+      }
+  }
+  # with the co-factor matrix complete, the inverse of A that is A^-1 is
+  # A^-1 = 1/det(A)*t(C) where t(C) is the transpose of the conjugate matrix
+  return((1 / det(A))*t(C))
+}
+A <- matrix(c(1, 2, 4, 7, 1,
+              2, 1, -1, 3, 0,
+              4, -1, -2, 6, -1,
+              3, 1, 5, 2, 1, 
+              0, 3, 1, 1, 1), nrow = 5, ncol = 5)
+B <- myinverse(A)
+B
+```
+
+### Show that by multplying the matrix A with it's inverse A^-1, we get the Identity
+
+### matrix
+
+```{r}
+A %*% B
+```
+
+### As we can see the off-diagonals are very close to 0 and the diagonal entries
+
+### equal to 1.

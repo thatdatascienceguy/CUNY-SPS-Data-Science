@@ -1,0 +1,125 @@
+---
+title: "Homework7"
+author: "Jonathan Hernandez"
+date: "October 4, 2018"
+output: pdf_document
+---
+
+1. Let X1, X2, . . . , Xn be n mutually independent random variables, each of
+
+which is uniformly distributed on the integers from 1 to k. Let Y denote the
+
+minimum of the Xi’s. Find the distribution of Y.
+
+Answer:
+
+$Y = min(X_1, X_2,...,X_n)$ that is the minimum of x1, minimum of x2, etc
+
+For this, majority of the $min(X_i)$ will be near 1 and a few may drift off above
+
+1 so it would be a right-skewed distribution
+
+2. Your organization owns a copier (future lawyers, etc.) or MRI (future doctors).
+
+This machine has a manufacturer’s expected lifetime of 10 years. This means
+
+that we expect one failure every ten years. (Include the probability statements
+
+and R Code for each part.).
+
+a. What is the probability that the machine will fail after 8 years?. Provide also the
+
+expected value and standard deviation. Model as a geometric. (Hint: the probability is
+
+equivalent to not failing during the first 8 years..)
+
+Answer: As a geometric distribution
+
+Let X be the # of years
+
+p = 0.1 in this case
+
+$P(X > 8) = 1 - P(X \leq 8) = 1 - \big[P(X = 1) + P(X = 2) + ... + P(X=8)\big] = 1 - 0.5695 = 0.4304$
+
+Expected value: 1/p = 1/0.1 = 10 years(agrees with exepcted value in the problem description)
+
+Standard deviation: $\sqrt{1 - p} / p = \sqrt{0.9} / 0.1 = 9.486$ years
+
+R code
+
+```{r}
+p <- 0.1
+years <- 8
+# compute the sum from 0 to 7 successes
+pgeom(years-1, prob = p, lower.tail = FALSE)
+```
+
+b. What is the probability that the machine will fail after 8 years?. Provide also the
+
+expected value and standard deviation. Model as an exponential.
+
+The Average for a exponential distribution is $1/\lambda$. The average is given to us
+
+as $\mu = 10$ that is $\lambda = 0.1$
+
+Let X be the number of years, x in this case = 8
+
+$P(X > 8) = 1 - P(X \leq 8) = 1 - \big[1 - e^{-\lambda x}\big] = e^{-0.1*8} = 0.4493$
+
+Expected value: $\mu = 10$ years
+
+Variance: $1/\lambda^2 = 1/0.1 = 10 = \mu$ years
+
+R code
+
+```{r}
+lambda <- 0.1
+years <- 8
+pexp(years, rate = lambda, lower.tail = FALSE) # or exp(years*lambda)
+```
+
+c. What is the probability that the machine will fail after 8 years?. Provide also the
+
+expected value and standard deviation. Model as a binomial. (Hint: 0 success in 8
+
+years)
+
+p = 0.1
+x = 0 successes
+n = 8 trials (years)
+
+$P(X > 8) = 1 - P(X \leq 8) = 1 - \binom{8}{0}0.1^0(0.9^8) = 0.5695$
+
+Expected Value: $np = 8*0.1 = 0.8$ years
+
+Standard Deviation: $\sqrt{np(1-p)} = \sqrt{8*0.1*0.9} = 0.848$ years
+
+R code
+
+```{r}
+p <- 0.1
+n <- 8
+x <- 0
+
+pbinom(0,8,prob = 0.1,lower.tail = FALSE)
+```
+
+d. What is the probability that the machine will fail after 8 years?. Provide also the
+
+expected value and standard deviation. Model as a Poisson.
+
+rate = 0.1 = $\lambda$
+
+$P(X > 8) = 1 - P(X \leq 8) = 1 -\big[P(X = 0) + P(X = 1) + ... + P(X = 8)\big] =  0.6671$
+
+Expected Value = $\lambda = 10$ = variance
+
+Standard deviation = $\sqrt\lambda = \sqrt{10}$ = 3.162 years
+
+R code
+
+```{r}
+x <- 8
+lambda <- 10
+ppois(x, lambda = lambda,lower.tail = FALSE)
+```

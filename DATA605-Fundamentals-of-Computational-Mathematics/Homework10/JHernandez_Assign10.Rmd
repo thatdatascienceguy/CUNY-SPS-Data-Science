@@ -1,0 +1,120 @@
+---
+title: "Homework 10"
+author: "Jonathan Hernandez"
+date: "November 2, 2018"
+output: pdf_document
+---
+
+    Smith is in jail and has 1 dollar; he can get out on bail if he has 8 dollars.
+    A guard agrees to make a series of bets with him. If Smith bets A dollars, he
+    wins A dollars with probability 0.4 and loses A dollars with probability 0.6.
+    
+    Find the probability that he wins 8 dollars before losing all his money if
+    
+    (a) he bets 1 dollar each time (timid strategy)
+    (b) he bets, each time, as much as possible but not more than necessary to
+    bring his fortune up to 8 dollars (bold strategy).
+    (c) Which strategy gives Smith the better chance of getting out of jail?
+    
+let $S = \{s_1, s_2,...,s_8\}$ be the states where $s_i =$ state of having i dollars.
+
+let p = probability he wins A dollars and q = 1-p = probability he loses A dollars
+
+for (a) with this given information we have the transition matrix
+
+```{r}
+# transition matrix
+p <- 0.4
+q <- 0.6
+P <- matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0,
+              q, 0, p, 0, 0, 0, 0, 0, 0,
+              0, q, 0, p, 0, 0, 0, 0, 0,
+              0, 0, q, 0, p, 0, 0, 0, 0,
+              0, 0, 0, q, 0, p, 0, 0, 0,
+              0, 0, 0, 0, q, 0, p, 0, 0,
+              0, 0, 0, 0, 0, q, 0, p, 0,
+              0, 0, 0, 0, 0, 0, q, 0, p,
+              0, 0, 0, 0, 0, 0, 0, 0, 1), nrow = 9, ncol = 9, byrow = TRUE)
+rownames(P) <- 0:8
+colnames(P) <- 0:8
+P
+```
+
+We can compute the probability of reaching the absorbing state that is at state $s_8$
+
+by computing $B = NR$ where $N = (I-Q)^{-1}$ and $I =$ 7x7 identity matrix and 
+
+$Q =$ square matrix of the transient states that is rows and columns 1:7 and
+
+$R=$ square matrix of the column absorbing states and the row transient states
+
+that is
+
+```{r}
+library(Matrix)
+# matricies to build matrix B as the probability
+Q <- P[c(2:8), c(2:8)]
+I <- diag(nrow = nrow(Q))
+Q
+
+N <- solve(I - Q)
+N
+
+R <- P[c(2:8), c(1, 9)]
+R
+
+# compute B
+
+B <- N %*% R
+B
+round(B[1,2], 4)
+```
+
+By looking at the first row second column of B which represents the probability that at the 
+
+start of this series of bets, he has only about 0.0203 or about 2.03% percent chance of getting
+
+out of jail.
+
+for (b) the transition matrix will be different and smith will go for a all-or-nothing approach.
+
+the transition matrix will look something like this and re-calculation of the matricies:
+
+```{r}
+P <- matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0,
+              q, 0, p, 0, 0, 0, 0, 0, 0,
+              q, 0, 0, 0, p, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0, 0,
+              q, 0, 0, 0, 0, 0, 0, 0, p,
+              0, 0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0, 1), nrow = 9, ncol = 9, byrow = TRUE)
+rownames(P) <- 0:8
+colnames(P) <- 0:8
+P
+
+Q <- P[c(2:8), c(2:8)]
+I <- diag(nrow = nrow(Q))
+Q
+
+N <- solve(I - Q)
+N
+
+R <- P[c(2:8), c(1, 9)]
+R
+
+# compute B
+
+B <- N %*% R
+B
+round(B[1,2], 4)
+```
+
+We see that using this all-or-nothing approach will give Smith about 6.4% of getting
+
+out of jail.
+
+for (c), we see that going the bold route/all-or-nothing approach is more feasible than
+
+the timid approach and more likley for Smith to get out of jail.

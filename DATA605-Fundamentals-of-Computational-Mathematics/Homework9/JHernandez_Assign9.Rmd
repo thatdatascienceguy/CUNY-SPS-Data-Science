@@ -1,0 +1,157 @@
+---
+title: "Homework9"
+author: "Jonathan Hernandez"
+date: "October 27, 2018"
+output: pdf_document
+---
+
+### 1. The price of one share of stock in the Pilsdorff Beer Company is given by $Y_n$ on
+
+### the nth day of the year. Finn observes that the differences $X_n = Y_{n+1} - Y_n$ appear
+
+### to be independent random variables with a common distribution having mean $\mu=0$ and 
+
+### variance $\sigma^2 = 1/4$. If $Y_1 = 100$, estimate the probability that $Y_365$ is
+
+a. $\geq 100$
+
+b. $\geq 110$
+
+c. $\geq 120$
+
+we can assume the $X_n$'s are nearly normal and compute the sum of the independent random variables
+
+$$
+\begin{aligned}
+S_n = X_1 + X_2 + ... + X_n \\
+= (Y_2 - Y_1) + (Y_3 - Y_2) + ... + (Y_{n+1} - Y_n) \\
+= Y_{n+1} - Y_1 \\
+= Y_{n+1} - 100
+\end{aligned}
+$$
+The $Y_2, Y_3 up to Y_n$'s all cancel out so it's only $Y_{n+1} - Y_1$ that survives.
+
+The mean of $S_n$ is computed as $n\mu = 0$ 
+
+The variance of $S_n$ is computed as $n\sigma^2 = 364*0.25 = 91$
+
+The standard deviation of $S_n$ is computed as $\sqrt{n\sigma^2} = \sqrt{91}$
+
+(n = 364 as $Y_{364+1} = Y_{364} + X_{364} = Y_{365}$)
+
+$S_{364} = Y_{365} - 100$ and $Y_{365} = S_{364} + 100$
+
+for a.
+
+$P(Y_{365} \geq 100) = P(S_{364} + 100 \geq 100) = P(S_{364} \geq 0)$
+
+As a nearly normal distribution with mean 0 and is symmetric around 0, $P(S_{364} \geq 0) \approx 0.5$
+
+for b.
+
+$P(Y_{365} \geq 110) = P(S_{364} + 100 \geq 110) = P(S_{364} \geq 10) = P(S_{364}^* \geq 10 / \sqrt{91})$
+
+for c.
+
+$P(Y_{365} \geq 120) = P(S_{364} + 100 \geq 120) = P(S_{364} \geq 20) = P(S_{364}^* \geq 20 / \sqrt{91})$
+
+we can use R to assist us in estimating the probablities
+
+b.
+
+```{r}
+sd <- sqrt(91)
+prob <- 10/sd
+
+pnorm(prob, lower.tail = FALSE)
+```
+c.
+```{r}
+sd <- sqrt(91)
+prob <- 20/sd
+
+pnorm(prob, lower.tail = FALSE)
+```
+
+
+### 2. Calcuate the expected value and variance of the binomial distribution
+
+### using the moment generating function
+
+Answer:
+
+Binomial Distribution: $p(x) = \binom{n}{j}p^j(q)^{n-j}$
+
+Moment Generating Function:
+
+$$
+\begin{aligned}
+g(t) = \sum_{j=0}^{n} e^{jt}p(x) \\
+= \sum_{j=0}^{n} e^{jt} \binom{n}{j}p^j(q)^{n-j} \\
+= \binom{n}{j} (pe^t)^j q^{n-j} \\
+= (pe^t + q)^n
+\end{aligned}
+$$
+The last part of the equality is that if you let $a = pe^t$, you have the binomial theorem that is
+
+$\sum_{j=0}^{n} \binom{n}{j} (a)^j q^{n-j} = (a+q)^n$ and substitute back, you get the momenting generating function
+
+to be $(pe^t + q)^n$
+
+$\sigma^2 = E(X^2) - E(X)^2$
+
+$E(X) = g'(0) = n(pe^t +q)^{n-1}pe^t\big|_{t=0} = np$
+
+(When you set t = 0, you get p+q in the base and q = 1-p so p+1-p = 1)
+
+$E(X)^2 = (np)^2$
+
+$E(X^2) = g''(0) = np \bigg[ e^t \big( p(n-1)(pe^t + q)^{n-2} + (pe^t + q)^{n-1} \big) \bigg]\bigg|_{t=0} =$
+$np^2(n-1)+np$
+
+$\sigma^2 = np^2(n-1)+np - (np)^2 = np(1-p)$
+
+The $E(X^2)$ is using the product rule for dervatives and evaluating at t =0.
+
+$\sigma^2$ is derived using factoring.
+
+### 3. Calcuate the expected value and variance of the exponential distribution 
+
+### using the moment generating function
+
+Answer:
+
+Exponential Distribution: $f(x) = \lambda e^{-\lambda x}$
+
+Moment Generating Function:
+
+$$
+\begin{aligned}
+M_X(t) = \int_{-\infty}^{\infty} e^{xt}f(x) dx \\
+= \int_{0}^{\infty} e^{xt} \lambda e^{-\lambda x} dx \\
+= \lambda \int_{0}^{\infty} e^{x(t-\lambda)} dx \\
+= \lambda (e^x/(t - \lambda))\big|_{0}^{\infty} (t < \lambda) \\
+= \lambda/(\lambda-t)
+\end{aligned}
+$$
+Note that $t < \lambda$ otherwise the moment generating function would not converge.
+
+Calculating the variance using a moment generating function:
+
+$\sigma^2 = E(X^2) - E(X)^2$
+
+$E(X) = M^{'}_X(0)$ that is the first moment is equal to the derivative of the moment 
+
+generating function with respect to t evaluated at 0 (t=0)
+
+$E(X^2) = M^{''}_X(0)$ that is the second moment if equal to the 2nd derivative of the moment
+
+generating function with respect to t evaluated at 0 (t=0)
+
+$E(X) = M^{'}_X(0) = \lambda*-1*-1(\lambda-0)^{-2} = 1/\lambda$
+
+$E(X)^2 = 1/\lambda^2$
+
+$E(X^2) = M^{''}_X(0) = 2\lambda/(\lambda-0)^{-3} = 2/\lambda^2$
+
+$\sigma^2 = 2/\lambda^2 - 1/\lambda^2 = 1/\lambda^2$

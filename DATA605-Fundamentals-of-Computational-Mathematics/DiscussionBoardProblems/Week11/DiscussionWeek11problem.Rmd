@@ -1,0 +1,113 @@
+---
+title: "Week 11 Regression Analysis in R"
+author: "Jonathan Hernandez"
+date: "November 3, 2018"
+output:
+  html_document: default
+---
+
+    Using R, build a  regression model for data that interests you.  Conduct residual analysis.
+    Was the linear model appropriate? Why or why not?
+
+### For this discussion, I will look at Kaggle's Powerlifting Database dataset.
+
+- It's a dataset containing competitor results in powerlifting from the 
+
+OpenPowerlifting Database and do residual analysis.
+
+I will build a simple linear regression model of body weights vs best bench press for seniors to see if 
+
+a linear relation exists between them.
+
+- Dataset can be found here: https://www.kaggle.com/open-powerlifting/powerlifting-database
+
+- Overview: https://www.kaggle.com/open-powerlifting/powerlifting-database/home
+
+- Get the data and examine a preview
+
+```{r}
+library(data.table)
+powerlift <- fread("openpowerlifting.csv")
+head(powerlift, n=5)
+```
+
+- Summary of the data
+```{r}
+summary(powerlift)
+```
+
+- Dimensions of the data and its structure
+```{r}
+dim(powerlift)
+str(powerlift)
+```
+
+- Grab rows such that the Best Bench Press > 0 (those competitors who were most likley
+disqualified) and Division as Seniors and extract just the 2 attributes in question
+
+```{r, message=FALSE}
+library(dplyr)
+powerlift_senior <- powerlift %>% filter(BestBenchKg > 0 & Division %like% 'Senior') %>% 
+  select(BodyweightKg, BestBenchKg)
+```
+
+### Visualize the data (EDA)
+
+```{r, message=FALSE}
+with(powerlift_senior, plot(BodyweightKg, BestBenchKg, xlab = "Body Weight (Kg)",
+                            ylab = "Best Bench Press (Kg)"))
+```
+
+### Residual Analysis
+
+```{r}
+lm_powerlift_senior <- lm(BestBenchKg ~ BodyweightKg, data = powerlift_senior)
+with(powerlift_senior, plot(BodyweightKg, BestBenchKg,xlab = "Body Weight (Kg)",
+                            ylab = "Best Bench Press (Kg)"))
+abline(lm_powerlift_senior)
+summary(lm_powerlift_senior)
+```
+
+- Equation of line is
+
+$$
+\begin{aligned}
+\widehat{bestbenchpress} = 0.1376 + 1.2804*\widehat{bodyweight}
+\end{aligned}
+$$
+
+- Residual plots
+```{r}
+plot(fitted(lm_powerlift_senior), resid(lm_powerlift_senior),
+     main = "Fitted vs residuals", xlab = "", ylab = "")
+abline(h =0)
+hist(resid(lm_powerlift_senior), xlab = "", main = "Histogram of Residuals")
+qqnorm(resid(lm_powerlift_senior))
+qqline(resid(lm_powerlift_senior))
+```
+
+### Summary
+
+- We see that a linear model based on one explanatory variable doesn't explain the
+
+data well. The $R^2$ value is quite low which shows that the fitted model doesn't
+
+accuractely predict the values of Senior divisions competitiors bench press best based 
+
+on their weight.
+
+- Looking at the summary of the model also shows that the intercept has a high p-value
+
+meaning that the significance can be ignored and is not a good estimate. One good thing
+
+is that the p-value of estimated body weight is a good predictor due to the low p-value
+
+and standard error.
+
+- The residual plots show that even though the distribution of residuals is nearly
+
+normal, the fitted data vs the residuals doesn't show constant variance and for 
+
+larger fitted values, the variance begins to change. A good-fit linear model would 
+
+have constant variance or nearly constant variance.

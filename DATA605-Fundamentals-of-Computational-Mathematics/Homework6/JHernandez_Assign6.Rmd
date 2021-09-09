@@ -1,0 +1,352 @@
+---
+title: "Homework6"
+author: "Jonathan Hernandez"
+date: "September 24, 2018"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+### 1. A box contains 54 red marbles, 9 white marbles, and 75 blue marbles. If a marble is randomly selected from the box,
+
+### what is the probability that it is red or blue? Express your answer as a fraction or a decimal number rounded to four
+
+### decimal places.
+
+Answer
+
+There are a total of 138 marbles so the probability of picking a colored marble
+
+is the total number of that colored marble / total marbles
+
+$P(red \cup blue) = P(red) + P(blue) - P(red \cap blue)$
+
+$P(red \cap blue) = 0$ as there is no way to pick a marble that has both colors.
+
+So $P(red \cup blue) = P(red) + P(blue) = 54/139 + 75/139 = 0.9281$
+
+### 2. You are going to play mini golf. A ball machine that contains 19 green golf balls, 20 red golf balls, 24 blue golf 
+
+### balls, and
+
+### 17 yellow golf balls, randomly gives you your ball. What is the probability that you end up with a red golf ball? 
+
+### Express your answer as a simplified fraction or a decimal rounded to four decimal places.
+
+Answer:
+
+There are a total of 80 golf balls and each one equally likley to be selected.
+
+$P(red) = 20 / 80 = 0.25$
+
+
+### 3. A pizza delivery company classifies its customers by gender and location of residence. The research department has
+
+### gathered data from a random sample of 1399 customers. The data is summarized in the table below.
+
+\[
+\begin{table}[]
+\begin{tabular}{|c|c|c|}
+\hline
+\multicolumn{3}{|c|}{Gender and Residence of Customers}                               \\ \hline
+\multicolumn{1}{|l|}{}    & \multicolumn{1}{l|}{Males} & \multicolumn{1}{l|}{Females} \\ \hline
+Apartment                 & 81                         & 228                          \\ \hline
+Dorm                      & 116                        & 79                           \\ \hline
+With Parent(s)            & 215                        & 252                          \\ \hline
+Sorority/Fraternity House & 130                        & 97                           \\ \hline
+Other                     & 129                        & 72                           \\ \hline
+\end{tabular}
+
+\end{table}
+\]
+
+### What is the probability that a customer is not male or does not live with parents? Write your answer as a fraction or a
+
+### decimal number rounded to four decimal places.
+
+Answer:
+
+Let's write out the equation using the asked probabilities:
+
+\[
+\begin{aligned}
+ P(\overline{male} \cup \overline{parents}) = P(\overline{male}) + P(\overline{parents})
+ - P(\overline{male} \cap \overline{parents})
+\end{aligned}
+\]
+
+(Note that the bar on top of the event is the complenent of that event)
+
+Looking at the table, we see $P(\overline{male}) = 729/1399$ (sum up the females column)
+
+and $P(\overline{parents}) = 932/1399$ (add up all the entries excluding the with parents row)
+
+We also see from the table $P(\overline{male} \cap \overline{parents})$ = 477/1399
+
+(This can be found by looking at the females column and add it up excluding the 
+
+number of females who live with their parents)
+
+Finally pluggin in the numbers gives
+
+$P(\overline{male} \cup \overline{parents}) = (732+932-477)/1339 = 1184/1399 = 0.8463$
+
+### 4. Determine if the following events are independent.
+
+### Going to the gym. Losing weight.
+
+Answer: A) Dependent B) Independent
+
+Let G = event of going to the gym and W = event of losing weight
+
+if these two events are independent then $P(G \cap W) = P(G)P(W)$
+
+These are dependent events as the probability of going to the gym and losing weight
+
+is not equivalent to going to the gym only and losing weight only. Usually they go
+
+hand-in-hand together.
+
+### 5. A veggie wrap at City Subs is composed of 3 different vegetables and 3 different condiments wrapped up in a 
+
+### tortilla. If there are 8 vegetables, 7 condiments, and 3 types of tortilla available, how many different veggie wraps 
+
+### can be made?
+
+Answer: using the answer for combinations that is $_nC_r = n! / r!(n - r)!$
+
+$n! = n*(n-1)*(n-2)*...*1$
+
+We can apply this equation for each of the foods
+
+for picking 3 vegetables from 8 vegetables there are $_8C_3 = 8!/3!5! = 56$
+
+for picking 3 condiments from 7 condiments there are $_7C_3 = 7!/3!4! =  35$
+
+for picking 3 types of tortilla for making a single one there are $_3C_1 = 3!/1!2! = 3$
+
+we take the product of these numbers $56*3*35 = 5880$ possible ways to make different
+
+veggie wraps.
+
+### 6. Determine if the following events are independent.
+
+### Jeff runs out of gas on the way to work. Liz watches the evening news.
+
+### Answer: A) Dependent B) Independent
+
+these would be independent events as the outcomes of these events does not affect
+
+the outcome of the other or gives no information about the other.
+
+### 7. The newly elected president needs to decide the remaining 8 spots available in the cabinet he/she is appointing. If there
+
+### are 14 eligible candidates for these positions (where rank matters), how many different ways can the members of the
+
+### cabinet be appointed?
+
+Answer: using permutations (where order matters) we can find how many possible ways
+
+to vacate 8 spots from selecting 14 people.
+
+that is n = 14 and r = 8 and $_nP_r = n!/(n-r)!$ 
+
+so $_{14}P_8 = 14!/6! = 121080960$ so over a 121 million different ways can the members
+
+of the cabinet be appointed.
+
+### 8. A bag contains 9 red, 4 orange, and 9 green jellybeans. What is the probability of reaching into the bag and randomly
+
+### withdrawing 4 jellybeans such that the number of red ones is 0, the number of orange ones is 1, and the number of green
+
+### ones is 3? Write your answer as a fraction or a decimal number rounded to four decimal places.
+
+Answer: We can use the binomial expansion or probability mass function for each type ot jellybean
+
+For the red jellybeans we can label a success as picking a red jellybean and failure otherwise
+
+we can apply this for the other colored jellybeans using the formula below and
+
+R's builtin dbinom() function.
+
+Binomial expansion (or probability mass function):
+
+$P(k;n,p) = \binom{n}{k}p^k(1-p)^{(n-k)}$
+
+For red, n = 9 and k = 0 and p = 1/22 so $P(k; n,p) = P(0; 9, 1/22) = 
+```{r}
+red <- dbinom(0, 9, prob = 1/22)
+```
+
+For orange, n = 4, k = 1, p = 1/22
+```{r}
+orange <- dbinom(1, 4, prob = 1/22)
+```
+
+For green, n = 9, k = 3, prob = 1/22
+```{r}
+green <- dbinom(3, 9, prob = 1/22)
+```
+
+compute the product of the 3 binomial variables:
+```{r}
+red*green*orange
+```
+
+### 9. Evaluate the following expression: 11! / 7!
+
+Answer: 11!/7! = $11*10*9*...*1 / 7*6*5*...*1 = 11*10*9*8 = 7920$
+
+### 10. Describe the comoplement of the given event:
+
+### 67% of subscribers to a fitness magazine are over the age of 34.
+
+Answer: Let E be the event that subscribers of a fitness magazine are over the age of 34.
+
+Then the complement that is E` is:
+
+subscribers of a fitness magazine are under the age of 34.
+
+### 11. If you throw exactly three heads in four tosses of a coin you win $97.
+
+### If not, you pay me $30.
+
+### Step1. Find the expected value of the proposition. Round your answer to two decimal places.
+
+Answer: The expected value of this game/event can be computed as follows:
+
+Let X be the event of flipping 4 coins.
+
+$E[X] = wp - l(1-p)$ where w = amount gained, l = amount loss and p is the probability
+
+of getting three heads exactly out of 4 tosses of a coin.
+
+We can use the Binomial distribution as the coin flips are independent that is
+
+$P(k;n,q) = \binom{n}{k}q^k(1-q)^{(n-k)}$ where n = 4, k = 3, and q = 1/2 probability of 
+
+getting a head.
+
+$p = P(3; 4, 1/2) = \binom{4}{3}.5^3(1-.5)^{(4-3)} = 1/4$
+
+then, (1-p) = 3/4. This makes sense as there are 4 ways out of 16 to get exactly 
+
+three heads (1/4) and 12 out of 16 ways otherwise (12/16 = 3/4)
+
+w = 97 and l = 30 and thus $E[X] = 97*.25 - 30*.75 = 1.75$ as the expected value.
+
+### Step 2. If you played this game 559 times how much would you expect to win or lose? (Losses must be entered as
+
+### negative.)
+
+Answer: let n = 559, if we repeat this game n times we can find out how much we could win
+
+by taking E[X] and multiplying it by n that is $nE[X] = 559*1.75 = 978.25$ so this is game
+
+that is beneficial to play.
+
+### 12. Flip a coin 9 times. If you get 4 tails or less, I will pay you $23. Otherwise you pay me $26.
+
+### Step 1. Find the expected value of the proposition. Round your answer to two decimal places.
+
+Answer:
+
+Let X be event of flipping a coin 9 times.
+
+$E[X] = wp - l(1-p)$
+
+w = 23 and l = 26
+
+to find p, use the Binomial distribution formula. To find the probability of getting 4
+
+tails or less, we have add up the successes of getting 0 tails, 1 tail, 2 tails, 3 tails and 4 tails
+
+that is 
+
+\[
+\begin{aligned}
+  p = p(X < 4) = P(0; 9, 0.5) + P(1; 9, 0.5) + P(2; 9, 0.5) + P(3; 9, 0.5) + P(4; 9, 0.5) =\\
+  \binom{9}{0}.5^0(1-.5)^{(9-0)} + \binom{9}{1}.5^1(1-.5)^{(9-1)} + \binom{9}{2}.5^2(1-.5)^{(9-2)} \\
+  +\binom{9}{3}.5^3(1-.5)^{(9-3)} + \binom{9}{4}.5^4(1-.5)^{(9-4)} = 0.5
+\end{aligned}
+\]
+
+This makes sense as with $2^9 = 512$ possibilities there are 206 ways to get 4 tails or less flipping 9 coins
+
+so the expected value is $E[X] = 23*0.5 - 26*0.5 = -1.5$
+
+### Step 2. If you played this game 994 times how much would you expect to win or lose? (Losses must be entered as
+
+### negative.)
+
+Answer: let n = 994 then we would expect to have $nE[X] = 994*-1.5 = -1491$ so if you play this game many times,
+
+you much more likley to lose alot of money.
+
+### 13. The sensitivity and specificity of the polygraph has been a subject of study and debate for years. A 2001 study of the
+
+### use of polygraph for screening purposes suggested that the probability of detecting a liar was .59 (sensitivity) and that
+
+### the probability of detecting a "truth teller" was .90 (specificity). We estimate that about 20% of individuals selected for
+
+### the screening polygraph will lie.
+
+### a. What is the probability that an individual is actually a liar given that the polygraph detected him/her as such? (Show
+
+### me the table or the formulaic solution or both.)
+
+### b. What is the probability that an individual is actually a truth-teller given that the polygraph detected him/her as
+
+### such? (Show me the table or the formulaic solution or both.)
+
+### c. What is the probability that a randomly selected individual is either a liar or was identified as a liar by the
+
+### polygraph? Be sure to write the probability statement.
+
+Answer: 
+
+Let P(truth) = probablity of person telling truth = 
+
+Let P(lie) = probability of person lying
+
+Let P(+) = Polygraph reveals truth
+
+Let P(-) = Polygraph reveals lie
+
+a. Goal is to find $P(lie | -)$
+
+$P(lie | -) = P(lie \cap -) / P(-)$
+
+$P(truth) = 0.8, P(lie) = 0.2$ as per information given
+
+$specificity = P(+ | truth) = 0.9$
+
+$sensitivity = P(- | lie) = 0.59$
+
+$P(lie \cap -) = P(lie) * P(- | lie) = 0.2 * 0.59 = 0.118$
+
+We also need to find $P(truth \cap -)$ to compute $P(-)$
+
+$P(truth \cap -) = P(truth) * P(- | truth) = 0.8 * 0.1 = 0.08$
+
+$P(-) = P(lie \cap -) + P(truth \cap -) = 0.118 + 0.08 = 0.198$
+
+Finally, $P(lie | -) = 0.118/ 0.198 = 0.595$
+
+b. Goal is to find $P(truth | +)$
+
+$P(truth | +) = P(truth \cap +) / P(+)$
+
+$P(truth \cap +) = P(truth) * P(+ | truth) = 0.8 *0.9 = 0.72$
+
+$P(lie \cap +) = P(lie) * P(+ | lie) = 0.2 * 0.41 = 0.082$
+
+$P(+) = P(truth \cap +) + P(lie \cap +) = 0.72 + 0.082 = 0.802$
+
+Finally, $P(truth | +) = 0.72/0.802 = 0.897$
+
+c. Goal is to find $P(lie \cup -)$
+
+$P(lie \cup -) = P(lie) + P(-) - P(lie \cap -) = 0.2 + 0.198 -0.118 = 0.28$
+

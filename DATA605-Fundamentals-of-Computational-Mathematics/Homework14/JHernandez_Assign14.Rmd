@@ -1,0 +1,87 @@
+---
+title: "Homework14"
+author: "Jonathan Hernandez"
+date: "November 13, 2018"
+output: pdf_document
+---
+
+    This week, we'll work out some Taylor Series expansions of popular functions.
+    
+- $f(x) = 1/(1-x)$
+- $f(x) = e^x$
+- $f(x) = \ln(1+x)$
+
+    For each function, only consider its valid ranges as indicated in the notes when
+    you are computing the Taylor Series expansion. Please submit your assignment as a
+    R-Markdown document.
+    
+- Taylor Series definition
+
+Let $f(x)$ have derivatives of all orders at x=c.
+
+- The taylor series of $f(x)$, centered at c is
+
+$\sum^{\infty}_{n=0} \frac{f^{(n)}(c)}{n!}(x-c)^n$
+
+- for $f(x) = 1/(1-x)$, let's compute some derivatives of $f(x)$ to get the idea of
+how the series acts, note that the function's range is all real numbers $\neq 0$
+
+    - $f{'}(x) = 1/(1-x)^2$
+    - $f{''}(x) = 2/(1-x)^3$
+    - $f{'''}(x) = 6/(1-x)^4$
+    - $f^{(4)}(x) = 24/(1-x)^5$
+
+- It looks like the $n^{th}$ derivative is 
+
+$f^{(n)}(x) = n!/(1-x)^n$ so we compute the Taylor Series as
+
+$$
+\begin{aligned}
+\sum^{\infty}_{n=0} \frac{n!/(1-x)^n}{n!}(x-c)^n \\
+= \sum^{\infty}_{n=0} \bigg[\frac {(x-c)}{(1-x)} \bigg]^n
+\end{aligned}
+$$
+- This is the Taylor series centered at c. Letting c = 0 and computing the derivatives at c gives
+
+$f(x) = \sum^{\infty}_{n=0} x^n$
+
+- For $f(x) = e^x$, it's easy to see how $f(x) = f{'}(x) = f{''}(x) = f{'''}(x) = ... 
+and thus $f^{(n)}(x) = e^x$ and also the range of $e^x$ is from $(0,\infty)$
+
+- The Taylor Series centered at c
+
+$$
+\begin{aligned}
+\sum^{\infty}_{n=0} \frac{e^x}{n!}(x-c)^n 
+\end{aligned}
+$$
+
+- Letting c = 0 and computing the derivatives at c gives 
+
+$f(x) = \sum^{\infty}_{n=0} \frac{x^n}{n!}$
+
+- For $f(x) = \ln(1+x)$, the range of the function is $(-\infty,\infty)$
+
+- First few derivatives of $\ln(1+x)$ are
+
+    - $f{'}(x) = 1/(1+x)$
+    - $f{''}(x) = -1/(1+x)^2$
+    - $f{'''}(x) = 2/(1+x)^3$
+    - $f^{(4)}(x) = -6/(1+x)^4$
+    - $f^{(5)}(x) = 24/(1+x)^5$
+
+- The pattern we see for the $n^{th}$ derivative is $f^{(n)}(x) = (-1)^{n+1} (n-1)!/(1+x)^n$
+for $n>0$
+
+- The Taylor series centered at c
+
+$$
+\begin{aligned}
+\ln(1+x) + \sum^{\infty}_{n=1} (-1)^{n+1} \frac{(n-1)!}{(1+x)^n n!} (x-c)^n \\
+= \ln(1+x) + \sum^{\infty}_{n=1} (-1)^{n+1} \frac{(x-c)^n}{n(1+x)^n}
+\end{aligned}
+$$
+
+- Letting c = 0 and computing the derivatives at c gives
+
+- $\sum^{\infty}_{n=1} (-1)^{n+1} \frac{x^n}{n}$

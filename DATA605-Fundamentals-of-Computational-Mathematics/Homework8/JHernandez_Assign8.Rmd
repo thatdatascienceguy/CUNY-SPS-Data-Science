@@ -1,0 +1,101 @@
+---
+title: "Homework8"
+author: "Jonathan Hernandez"
+date: "October 11, 2018"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+### 11. A company buys 100 lightbulbs, each of which has an exponential lifetime of 1000 hours. 
+
+### What is the expected time for the first of these bulbs to burn out?
+
+We are given the expected lifetime of a bulb is 1000 hours = $\mu$
+
+let $X_i$ be the independent random variable for light bulb i.
+
+then the $X_i$'s all follow a exponential distribution with rate parameter $\lambda_i$
+
+Expected value for light bulb i: $E[X_i] = \mu = 1000 = 1/\lambda_i$ so $\lambda_i = 1/1000$
+
+summing up the lambda values (they're all equal) gives $100*\lambda = 100* (1/1000) = 1/10$
+
+we can use the updated $\lambda$ value that is the sum of all lambda values and show that 
+
+the expected time is $E[min(X_1,x_2,...X_100)] = 1/(1/10) = 10 hours.
+
+### Exercise 14 (from Section 7.2) Assume that $X_1$ and $X_2$ are independent random variables, each having an
+
+### exponential density with parameter $\lambda$. Show that $Z = X_1 - X_2$ has density
+
+### $f_Z(z) = (1/2)\lambda e^{-\lambda |z|}$
+
+Using convolution we are going to compute the difference of two expoential distributions
+
+note that $f_{X_1}(x_1) = f_{X_2}(x_1) = \lambda e^{-\lambda z}$ for $x_1 \geq 0$ and 0 otherwise.
+
+First, we can rewrite Z as $Z = X_1 + (-X_2)$ and set $-X_2 = Z - X_1$
+
+The convolution of $X_1$ and $-X_2$ is 
+
+1. $f_Z(z) = \int_{-\infty}^{\infty} f_{X_1}(x_1) f_{-X_2}(z-x_1) dx_1$
+
+note that $f_{-X_2}(Z - X_1) = f_{X_2}(X_1 - Z)$ (switch the signs)
+
+That is 
+$$
+\begin{aligned}
+f_Z(z) = \int_{-\infty}^{\infty} f_{X_1}(x_1) f_{X_2}(x_1-z) dx_1 = \\
+\text{we set the limits in the integral from 0 to positive infinity)} \\
+\int_{0}^{\infty} \lambda e^{-\lambda x_1} \lambda e^{-\lambda (x_1-z)}dx_1 = \\
+\lambda^2 \int_{0}^{\infty}e^{-\lambda(2x_1-z)} dx_1 = \\
+\lambda^2 \int_{0}^{\infty}e^{\lambda z} e^{-2\lambda x_1} dx_1 = \\
+\lambda^2 e^{\lambda z}\int_{0}^{\infty} e^{-2\lambda x_1} dx_1 = \\
+\lambda^2 e^{\lambda z}\big[-(1/2)e^{-2\lambda x_1}\big]_{0}^{\infty} = \\
+(1/2)\lambda e^{\lambda z}
+\end{aligned}
+$$
+Through this long exercise we notice that when $z < 0$, we get $f_Z(z)=(1/2)\lambda e^{-\lambda z}$
+
+and for $z \geq 0$, we get $f_Z(z)=(1/2)\lambda e^{\lambda z}$ we can use the absolute value of z as
+
+$f_Z(z) = f_Z(-z)$ that is $f_Z(z)=(1/2)\lambda e^{-\lambda |z|}$ which is a distrubution for all z.
+
+### Exercise 1 (from Section 8.2): Let X be a continuous random variable with mean $\mu = 10$ and variance
+
+### $\sigma^2 = 100/3$. Using Chebyshev’s Inequality, find an upper bound for the following 
+
+### probabilities:
+
+(a) $P(|X - 10| \geq 2)$
+
+(b) $P(|X - 10| \geq 5)$
+
+(c) $P(|X - 10| \geq 9)$
+
+(d) $P(|X - 10| \geq 20)$
+
+
+(From the textbook which will be used to solve these exercises)
+
+(Chebyshev Inequality) Let X be a continuous random variable
+
+with density function $f(x)$. Suppose X has a finite expected value $\mu = E(X)$ and
+
+finite variance $\sigma^2 = V(X)$. Then for any positive number $\epsilon > 0$ we have
+
+$P(|X - \mu| \geq \epsilon) \leq \sigma^2/\epsilon^2$
+
+a) $\epsilon = 2$ and the upper bound is $\sigma^2/\epsilon^2 = (100/3)/4 = 25/3$
+
+b) $\epsilon = 5$ and the upper bound is $\sigma^2/\epsilon^2 = (100/3)/25 = 4/3$
+
+However for a) and b), the upper bound is greater than 1 which cannot be true for
+
+a probability value. Hence the upper bound is 1.
+
+c) $\epsilon = 9$ and the upper bound is $\sigma^2/\epsilon^2 = (100/3)/81 = 100/243$
+
+d) $\epsilon = 20$ and the upper bound is $\sigma^2/\epsilon^2 = (100/3)/400 = 1/12$

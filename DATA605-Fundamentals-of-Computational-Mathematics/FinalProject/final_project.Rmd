@@ -1,0 +1,446 @@
+---
+title: "Final Project"
+author: "Jonathan Hernandez"
+date: "December 5, 2018"
+output: pdf_document
+---
+
+## Problem 1
+
+let X = X2 and Y = Y2 that is
+
+```{r}
+X <- c(7.4, 6.4, 8.5, 9.5, 11.8, 8.8, 8.4, 5.1, 11.4, 15.1, 12.6, 8.0, 10.3, 10.4,
+       9.5, 9.5, 15.1, 6.6, 15.4, 8.2)
+
+Y <- c(20.8, 14.6, 18.0, 7.3, 19.4, 13.5, 14.7, 15.3, 12.6, 13.0, 13.1, 10.3, 14.9, 
+       14.8, 16.2, 15.7, 16.3, 11.5, 12.2, 11.8)
+```
+
+a) $P(X > x | Y > y)$ where x and y are the 3rd quartile and 1st quartile of x and y respectively.
+
+- First find the 1st quantile of Y and $P(Y > y)$
+
+```{r}
+x_3q <- quantile(X,.75)
+y_1q <- quantile(Y,.25)
+c(x_3q, y_1q)
+
+p_ge_y <- length(Y[Y > y_1q]) / length(Y) # P(Y > y)
+p_ge_y
+```
+
+- $P(X > x | Y > y) = P(X > x \cap Y > y)/P(Y > y)$ the numerator is the probability that
+both X and Y are above their respective quartiles.
+
+- We see that $P(Y > y) = 0.75$ from above and using the intersect() function we can see
+how many values both operators in the intersection have in common:
+
+```{r}
+x <- X[X > x_3q]
+y <- Y[Y > y_1q]
+p_x_and_y <- intersect(x, y)
+p_x_and_y
+```
+
+- only one value of out 20 (value of 12.6) so $P(X > x \cap Y > y) = 1/20$
+
+- Finally computing the conditional probability gives $P(X > x | Y > y)=$
+
+```{r}
+(length(p_x_and_y)/20) / p_ge_y
+```
+
+b) $P(X > x, Y > y)$ this is the joint probability or the intersection
+
+- This was calculated in a) and was denoted as 1/20
+
+c) $P(X < x) | Y > y)$ that is what is $P(X < x)$ given $P(Y > y)$
+
+- $P(X < x) | Y > y) = P(X < x \cap Y > y)/P(Y > y)$ we found $P(Y > y) = 0.75$
+earlier, now let's find the numerator.
+
+```{r}
+x <- X[X < x_3q]
+p_x_and_y <- intersect(x, y)
+p_x_and_y
+```
+
+- Thus $P(X > x, Y > y) = 0$
+
+- In addition, make a table of counts as shown below:
+
+```{r, echo=FALSE, message=FALSE}
+tbl <- "
+| x/y    | <=3rd quartile    | > 3rd quartile   | Total   |
+|--------|-------------------|------------------|---------|
+| <=1st  |                   |                  |         |
+|quartile|                   |                  |         |
+|--------|-------------------|------------------|---------|
+| > 1st  |                   |                  |         |
+|quartile|                   |                  |         |
+|--------|-------------------|------------------|---------|
+| Total  |                   |                  |         |
+|--------|-------------------|------------------|---------|
+"
+cat(tbl)
+```
+
+- For this we compute the joint probabilities for each of the 4 boxes and add them up
+
+```{r}
+x_1q <- quantile(X,.25)
+y_3q <- quantile(Y,.75)
+
+x1 <- X[X <= x_1q]
+x2 <- X[X > x_1q]
+
+y1 <- Y[Y <= y_3q]
+y2 <- Y[Y > y_3q]
+
+p_leq_x_leq_y <- intersect(x1, y1) # P(X <= 1st quartile, Y <= 3rd quartile)
+p_leq_x_ge_y <- intersect(x1, y2) # P(X <= 1st quartile, Y > 3rd quartile)
+p_ge_x_leq_y <- intersect(x2,y1) # P(X > 1st quartile, Y <= 3rd quartile)
+p_ge_x_ge_y <- intersect(x2,y2) # P(X > 1st quartile, Y > 3rd quartile)
+
+p_leq_x_leq_y
+p_leq_x_ge_y
+p_ge_x_leq_y
+p_ge_x_ge_y
+```
+
+- Populating the table gives
+
+```{r echo=FALSE, message=FALSE, results='asis'}
+tbl <- "
+| x/y    | <=3rd quartile    | > 3rd quartile   | Total   |
+|--------|-------------------|------------------|---------|
+| <=1st  |                   |                  |         |
+|quartile|      0             |       0           |   0      |
+|--------|-------------------|------------------|---------|
+| > 1st  |                   |                  |         |
+|quartile|      3             |       0           |   3      |
+|--------|-------------------|------------------|---------|
+| Total  |      3             |        0          |     3    |
+|--------|-------------------|------------------|---------|
+"
+cat(tbl)
+```
+
+- Does splitting the training data in this fashion make them independent? Let A be the new variable counting those observations above the 1st quartile for X, and let B be the new variable counting those observations above the 1st quartile for Y.    Does $P(AB)=P(A)P(B)$?   Check mathematically, and then evaluate by running a Chi Square test for association
+
+```{r}
+c(x_1q,y_1q) # 1st quartiles of X and Y
+p_A <- length(X[X > x_1q]) / length(X)
+p_B <- length(Y[Y > y_1q]) / length(Y)
+p_AB <- length(intersect(X[X > x_1q], Y[Y > y_1q])) / 20
+p_AB
+p_A * p_B
+p_AB == (p_A * p_B) # P(A)P(B)
+```
+
+- We see that the variables are not independent by looking the values and equality above.
+
+- Now using a Chi Squared test to test
+
+```{r}
+dat <- data.frame(X,Y)
+chisq <- chisq.test(dat)
+chisq
+```
+
+- Using the chi squared test, we see that the p-value is about 0.7. This means that
+the variables X and Y are not stastically significantly associated.
+
+
+## Problem 2
+
+- You are to register for Kaggle.com (free) and compete in the House Prices: Advanced Regression Techniques competition.  https://www.kaggle.com/c/house-prices-advanced-regression-techniques .  I want you to do the following.
+
+- 5 points.  Descriptive and Inferential Statistics. Provide univariate descriptive statistics and appropriate plots for the training data set.  Provide a scatterplot matrix for at least two of the independent variables and the dependent variable. Derive a correlation matrix for any THREE quantitative variables in the dataset.  Test the hypotheses that the correlations between each pairwise set of variables is 0 and provide a 80% confidence interval.  Discuss the meaning of your analysis.  Would you be worried about familywise error? Why or why not?
+
+- 5 points. Linear Algebra and Correlation.  Invert your 3 x 3 correlation matrix from above. (This is known as the precision matrix and contains variance inflation factors on the diagonal.) Multiply the correlation matrix by the precision matrix, and then multiply the precision matrix by the correlation matrix. Conduct LU decomposition on the matrix.
+
+- 5 points.  Calculus-Based Probability & Statistics.  Many times, it makes sense to fit a closed form distribution to data.  Select a variable in the Kaggle.com training dataset that  is skewed to the right, shift it so that the minimum value is absolutely above zero if necessary. Then load the MASS package and run fitdistr to fit an exponential probability density function. (See  https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/fitdistr.html ). Find the optimal value of $\lambda$ for this distribution, and then take 1000 samples from this exponential distribution using this value (e.g., rexp(1000,$\lambda$)). Plot a histrogram and compare it with a histogram of your original variable. Using the exponential pdf, find the 5th and 95th percentiles using the cumulative distribution function (CDF). Also generate a 95% confidence interval from the empirical data, assuming normality. Finally, provide the empirical 5th percentile and 95th percentile of the data. Discuss.
+
+- 10 points.  Modeling.  Build some type of multiple  regression  model and submit your model to the competition board.  Provide your complete model summary and results with analysis.  Report your Kaggle.com  user name and score.
+
+
+### Load the data and examine it
+
+```{r}
+household <- read.csv("all/train.csv")
+dim(household)
+summary(household)
+str(household)
+head(household)
+```
+
+## Descripitive Statistics
+
+- Let's look at some plots and see the trend of the data more closely. We'll start with
+plotting and visualizing the quantative variables such as LotArea, LotFrontage, MasVnrArea,
+and SalePrice to see how the data behave.
+
+- Note the dependant variable is the SalePrice a continous numerical variable.
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(glmnet)
+library(FeatureHashing)
+```
+
+```{r}
+max(household$SalePrice)
+# quantative variable plots
+
+saleprice_plot <- ggplot(household, aes(SalePrice)) +
+  geom_histogram() +
+  ggtitle("Sale Price") +
+  xlab("") + ylab("") +
+  theme_bw() +
+  theme_classic()
+
+lotarea_plot <- ggplot(household, aes(LotArea)) +
+  geom_histogram() +
+  ggtitle("Lot Area") +
+  xlab("") + ylab("") +
+  theme_bw() +
+  theme_classic()
+
+totalbsmtsf_plot <- ggplot(household, aes(TotalBsmtSF)) +
+  geom_histogram() +
+  ggtitle("Total Basement Square Feet") +
+  xlab("") + ylab("") +
+  theme_bw() +
+  theme_classic()
+
+grid.arrange(saleprice_plot, lotarea_plot,totalbsmtsf_plot)
+
+ggplot(household, aes(ExterCond,SalePrice)) +
+  geom_boxplot() +
+  facet_grid(.~ ExterCond) +
+  ggtitle("Sale Price for each Type of External Condition ") +
+  xlab("") + ylab("") +
+  theme_bw() +
+  theme_classic() +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x = element_blank(),
+        axis.line.x = element_blank())
+
+ggplot(household, aes(YrSold,SalePrice)) +
+  geom_boxplot() +
+  facet_grid(.~ YrSold) +
+  ggtitle("Sale Price Based on Year Sold") +
+  xlab("") + ylab("") +
+  theme_bw() +
+  theme_classic() +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x = element_blank())
+
+ggplot(household, aes(SaleCondition,SalePrice)) +
+  geom_boxplot() +
+  facet_grid(.~ SaleCondition) +
+  ggtitle("Sale Price Based on Sale Condition") +
+  xlab("") + ylab("") +
+  theme_bw() +
+  theme_classic() +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x = element_blank())
+
+ggplot(household, aes(KitchenQual,SalePrice)) +
+  geom_boxplot() +
+  facet_grid(.~ KitchenQual) +
+  ggtitle("Sale Price Based on Kitchen Quality") +
+  xlab("") + ylab("") +
+  theme_bw() +
+  theme_classic() +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x = element_blank())
+```
+
+- Plots show that the Sale price is quite left skewed and the lot area is 
+heavily left-skewed; good for analysis later.
+
+- We also see that the median price of sold homes is about the same for each year. 
+For normal sale conditions, there are heavy outliers and that could make a influence 
+in our model and analysis. 
+The same goes for fairly decent homes in okay external condition.
+
+- Let's create a scatterplot matrix using the pairs() function and see the visualization. 
+I will look at the most common things I feel are most important in looking for a place 
+to call home such as Year sold, kitchen quality, heating, overall condition,
+neighborhood, lot area, and sale price.
+
+```{r scatterplotmatrix}
+columns_scatterplotmatrix <- c("YrSold", "KitchenQual", "Heating", "OverallCond", "Neighborhood",
+                               "LotArea", "SalePrice")
+
+pairs(household[, columns_scatterplotmatrix], pch = 19)
+```
+
+- Let's also examine the correlation matrix as well for 3 quantative variables:
+
+ a) Sale Price: Continous
+
+ b) Garage Area: Continous
+ 
+ c) Lot Area: Continous
+
+
+```{r correlationmatrix}
+cor_matrix <- cor(as.matrix(household[, c("SalePrice", "LotArea", "GarageArea")]))
+cor_matrix
+```
+
+- With our 3x3 matrix, let's do a 80% confidence interval using the hypothesis below:
+
+ a) Null hypothesis: $cor(x,y) = 0$ that is there is not correlation between the two variables in question
+ 
+ b) Alternative hypothesis: $cor(x,y) \neq 0$ that is there is some correlation big or small between 
+ the two variables.
+ 
+```{r 80confint}
+cor.test(household$SalePrice, household$LotArea, method = "pearson", conf.level = 0.8)
+cor.test(household$LotArea, household$GarageArea, method = "pearson", conf.level = 0.8)
+cor.test(household$SalePrice, household$GarageArea, method = "pearson", conf.level = 0.8)
+```
+
+- Based on these correlation tests, we can see that we can reject the null hypothesis and favor
+the alternative that is $cor(x,y) \neq 0$ for the variables chosen.
+
+- There is a quite strong positive correlation between SalePrice (dependent variable) and GarageArea (independent variable).This makes sense as if one is buying a home, the sale price changes based on 
+the area of the garage.
+
+- Lot area doesn't have strong correlation with regards to sale price which it could be lot area may 
+not have much impact on sale price. Same also goes for lot area and garage area.
+
+- We are 80% confident the true correlation is within the intervals above for the specified variables.
+
+- Familywise error is defined as $FWE \leq 1 - (1-\alpha_{IT})^c$ and is the probability of coming to at least one
+false conclusion in a series of hypothesis tests. $\alpha_{IT}$ is the alpha level for an individual test 
+(in this case 0.2) and c is the number of comparisions. c =  3 test and computing the familywise error gives
+
+- $FWE \leq 1 - (1-\alpha_{IT})^c = 1 - (1-0.2)^3 = 0.488$ which is quite high considering only 
+3 tests were made and something that would have to be concern of getting a type 1 error.
+
+### Linear Algebra and Correlation
+
+- Per the description of this section, let's invert our 3x3 matrix from above that is
+
+```{r invertmatrix}
+inv_cor_matrix <- solve(cor_matrix) # precision matrix
+inv_cor_matrix
+```
+
+- Now multiply the precision matrix by the correlation matrix and do the other way around, then
+do LU Decomposition
+
+```{r ludecompsition}
+# precision matrix x correlation matrix
+inv_cor_matrix %*% cor_matrix
+
+cor_matrix %*% inv_cor_matrix
+
+library(matrixcalc) # lU Decomposition
+lu.decomposition(cor_matrix %*% inv_cor_matrix)
+
+lu.decomposition(inv_cor_matrix %*% cor_matrix) # they're not communitative
+min(household$TotalBsmtSF)
+```
+
+### Calculus Based Probability & Statistics
+
+- For this, we will choose the total basement square feet or TotalBsmtSF variable.
+
+```{r}
+library(MASS)
+# shift TotalBsmtSF variable so min > 0
+TotalBsmtSF_shift <- household$TotalBsmtSF + 1.0
+TotalBsmtSF_fit <- fitdistr(TotalBsmtSF_shift, "exponential")
+TotalBsmtSF_fit$estimate # optimal value of the rate parameter lambda
+
+par(mfrow=c(1,1))
+hist(TotalBsmtSF_shift, pch = 20, prob=TRUE)
+curve(dexp(x, TotalBsmtSF_fit$estimate), col="red", add=T)
+
+# take 1000 random samples from a exponential distribution
+sample_exp <- rexp(1000, rate=TotalBsmtSF_fit$estimate)
+hist(sample_exp, pch = 20, prob=TRUE)
+curve(dexp(x, TotalBsmtSF_fit$estimate), col="red", add=T)
+
+# use the cdf that is 1 - exp(-lambda*x)
+CDF_sample_exp <- 1 - exp(-TotalBsmtSF_fit$estimate*household$TotalBsmtSF)
+# 5% and 95% percentiles
+quantile(CDF_sample_exp, .05)
+quantile(CDF_sample_exp, .95)
+
+# 95% confidence interval assuming normality (mean and sd are the same for a exponential that is 1/lambda)
+
+mean_exp <- 1/TotalBsmtSF_fit$estimate
+sd_exp <- mean_exp
+
+# standard error
+sd_error <- qnorm(0.95)* (sd_exp / sqrt(length(household$TotalBsmtSF)))
+left_ci <- mean_exp - sd_error
+right_ci <- mean_exp + sd_error
+# confidence interval
+c(left_ci, right_ci)
+
+# quantile of empricial data
+emp_data <- ecdf(household$TotalBsmtSF)
+emp_data(5)
+emp_data(95)
+```
+
+- Assuming normality for a exponential distribution is a good idea as our best fit rate
+$1/\lambda$ is within our 95% confidence interval so we are 95% confident the true value of
+$1/\lambda$ falls within (1012.866, 1103.992).
+
+### Modeling
+
+- Let's use feaature selection such as LASSO to select parameters for our multiple
+regression model and submit our scores to kaggle. I will also use the technique of
+feature hashing when dealing with categorical variables and then use the glmnet library and it's
+function cv.glmnet() to come up with a model and then predict the Sale Prices of the test dataset.
+
+- Feature hashing example: http://amunategui.github.io/feature-hashing/
+
+- LASSO (Least absolute shrinkage and selection operator) is used to to avoid overfitting
+by penalizing large coefficients and it can shrink some coefficients of the feautres so in
+turn it also does feature selection.
+
+- LASSO introduction: http://ricardoscr.github.io/how-to-use-ridge-and-lasso-in-r.html
+
+```{r buildmodel}
+features <- setdiff(names(household), "SalePrice")
+objtrain_hashed <- hashed.model.matrix(~., data=household[, features], hash.size = 2^12,
+                                       transpose = FALSE)
+objtrain_hashed <- as(objtrain_hashed, "dgCMatrix")
+
+cv.fit <- cv.glmnet(x=objtrain_hashed, y=household$SalePrice, type.measure = "mse")
+plot(cv.fit)
+```
+
+- We see that the algorithm based on the plot has the lambda minimum value of about 65 
+variables and based on the graph, taking the lambda minimum (first dotted line on the left) 
+has a smaller mean squared error.
+This lambda value will be used in our predictions of the test dataset.
+
+- Finally let's use this model to predict the Saleprice in the test dataset and submit it to kaggle.
+
+```{r predicttest}
+household_test <- read.csv("all/test.csv")
+objtest_hashed <- hashed.model.matrix(~., data=household_test[, features], hash.size =2^12,
+                                      transpose = FALSE)
+objtest_hashed <- as(objtest_hashed, "dgCMatrix")
+household_predict <- predict(cv.fit, objtest_hashed, s="lambda.min")
+
+# append the ID to the predictions
+household_predict <- data.frame(Id=household_test$Id, SalePrice=household_predict)
+colnames(household_predict) <- c("Id", "SalePrice")
+write.csv(household_predict, file = "all/household_predictions.csv",
+          row.names = FALSE)
+```

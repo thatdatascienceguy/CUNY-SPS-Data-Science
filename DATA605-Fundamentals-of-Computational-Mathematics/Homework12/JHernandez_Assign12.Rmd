@@ -1,0 +1,139 @@
+---
+title: "Homework12"
+author: "Jonathan Hernandez"
+date: "November 11, 2018"
+output: pdf_document
+---
+
+    The attached who.csv dataset contains real-world data from 2008. The variables included follow.
+    Country: name of the country
+    LifeExp: average life expectancy for the country in years
+    InfantSurvival: proportion of those surviving to one year or more
+    Under5Survival: proportion of those surviving to five years or more
+    TBFree: proportion of the population without TB.
+    PropMD: proportion of the population who are MDs
+    PropRN: proportion of the population who are RNs
+    PersExp: mean personal expenditures on healthcare in US dollars at average exchange rate
+    GovtExp: mean government expenditures per capita on healthcare, US dollars at average exchange rate
+    TotExp: sum of personal and government expenditures.
+    
+    1. Provide a scatterplot of LifeExp~TotExp, and run simple linear regression. Do not transform the
+    variables. Provide and interpret the F statistics, R^2, standard error,and p-values only. Discuss
+    whether the assumptions of simple linear regression met.
+    
+    2. Raise life expectancy to the 4.6 power (i.e., LifeExp^4.6). Raise total expenditures to the 0.06
+    power (nearly a log transform, TotExp^.06). Plot LifeExp^4.6 as a function of TotExp^.06, and r
+    re-run the simple regression model using the transformed variables. Provide and interpret the F
+    statistics, R^2, standard error, and p-values. Which model is "better?"
+    
+    3. Using the results from 3, forecast life expectancy when TotExp^.06 =1.5. Then forecast life
+    expectancy when TotExp^.06=2.5.
+    
+    4. Build the following multiple regression model and interpret the F Statistics, R^2, standard error,
+    and p-values. How good is the model?
+    
+    LifeExp = b0+b1 x PropMd + b2 x TotExp +b3 x PropMD x TotExp
+    
+    5. Forecast LifeExp when PropMD=.03 and TotExp = 14. Does this forecast seem realistic? Why
+    or why not?
+    
+- Let's start by loading the data 'who.csv'
+
+```{r}
+country_stats_2008 <- read.csv("who.csv")
+head(country_stats_2008)
+str(country_stats_2008)
+
+dim(country_stats_2008)
+```
+
+For 1
+
+```{r}
+lm_lifeexp_totexp <- lm(LifeExp ~ TotExp, data = country_stats_2008)
+summary(lm_lifeexp_totexp)
+```
+
+- F-statistic: The F-statistic is a measure of how statistically significant or how $R^2$ is significant or not. It's the ratio of the sum of squared residuals (SSR) and sum of squared errors (SSE)
+that is (SSR/SSE). If the p-value is low for a F-statistic, it means adding more features contributes to a better fit modeling
+rather than having a intercept only model. The F-statistic is a bit high so our variable TotExp helps to improve the model.
+
+- The $R^2$ value tells us how close the data are to the fitted regression line. It is bound from 0 to 1.
+The closer to 1, the more the model's regression line fit the data. Here the $R^2$ is pretty low and thus our model's
+regression line doesn't fit the data well.
+
+- The Residual Standard error is the standard deviation of the residuals. The residual standard error is about 9.371 and means that it is quite far off from the data points. The Standard error in the variables are the standard deviation estimate of the variable coefficient. The coefficient standard errors are small and the coefficients are good to use in the model.
+
+- The only condition that is not met would be the R^2 squared value and Residual Standard error. The $R^2$ is low and the 
+residual standard error is too off from the data points so simple linear regression will not work.
+
+For 2.
+
+```{r}
+LifeExp2 <- country_stats_2008$LifeExp^4.6
+TotalExp2 <- country_stats_2008$TotExp^.06
+lm_lifeexp_totalexp2 <- lm(LifeExp2 ~ TotalExp2, data = country_stats_2008)
+summary(lm_lifeexp_totalexp2)
+```
+
+- F-statistic is higher than before with a p-value for it small so we can say that having TotExp raised to the 4.6th power is good to have in this model.
+
+- The $R^2$ value is higher than before and more closer to 1 so the fitted regression line constitues to a good amount of the data.
+
+- The residual standard error is much higher than before but that is expected as we scaled the explanatory variable exponentially. 
+
+- The p-values in the coefficients are also very low so that means that each coefficient is a good fit for the regression model.
+
+- This model does better describe the data with its $R^2$ value but the values in the coefficients and standard error can be a bit misleading. Overall this model is preferred than the first one.
+
+For 3)
+
+- Let's use the predict function with our model from 2)
+
+```{r}
+life_expectancy_predict <- predict(lm_lifeexp_totalexp2,data.frame(TotalExp2 = 1.5))
+life_expectancy_predict
+
+life_expectancy_predict <- predict(lm_lifeexp_totalexp2,data.frame(TotalExp2 = 2.5))
+life_expectancy_predict
+```
+
+For 4)
+
+```{r}
+lm_lifeexp_multreg <- lm(LifeExp ~ (PropMD + TotExp + (PropMD*TotExp)),
+                         data = country_stats_2008)
+summary(lm_lifeexp_multreg)
+```
+
+- F-statistic: 34.49 is smaller than before as we have more attributes and the p-value is small
+so the terms used are better than doing the intercept only model.
+
+- $R^2_{adj} = 0.3574$ is small so the fitted line doesn't contribute to a good amount of the data.
+(only about 35% of the fitted line estimates the data well)
+
+- The Standard Error of coefficients
+
+    - Intercept: 0.7956 standard deviations from the true intercept value
+    - TotExp: 8.982e-06 standard deviations from the true value of the coefficient TotExp
+    - PropMD: 278.8 standard deviations from the true value of the coefficient PropMD
+    - PropMD*TotExp: 1.472e-03 standard deviations from the true value of the coefficient
+
+- The PropMD coefficient estimate is rather large compared to the others.
+
+- p-values of coefficients:
+
+    - Intercept, TotExp, PropMD, PropMD*TotExp are all below 0.001 which means that we can reject
+    the null hypothesis (coefficients are zero) and accept the alternative hypothesis (coefficients !=0)
+    This tells us that the features are to be included in our model.
+    
+For 5)
+
+```{r}
+life_expectancy_predict <- predict(lm_lifeexp_multreg,
+                                   data.frame(TotExp = 14, PropMD = 0.03))
+life_expectancy_predict
+```
+
+- This value is not realistic as it is not common for someone to be expected to live over 107 years.
+Few people live to be that long and the prediction doesn't account other countries and other factors.
